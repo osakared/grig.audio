@@ -1,0 +1,5 @@
+-cp tests
+-cp src
+-main RunTests
+-dce full
+-lib tink_unittest

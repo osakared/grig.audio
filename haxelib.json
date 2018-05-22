@@ -1,0 +1,16 @@
+{
+  "name": "grig.audio",
+  "license": "MIT",
+  "tags": [
+    "audio",
+    "samples",
+    "effects"
+  ],
+  "classPath": "src",
+  "contributors": [
+    "thomasjwebb"
+  ],
+  "releasenote": "initial release",
+  "version": "0.0.0",
+  "dependencies": {}
+}
