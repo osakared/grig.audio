@@ -16,7 +16,7 @@ class AudioChannelTest {
         var channel1 = new AudioChannel(length, 44100);
         var channel2 = new AudioChannel(length, 44100);
         // Fill both with destructively interfering 
-        for (i in 0...length) {
+        for (i in 0...channel1.length) {
             channel1.set(i, Math.sin(i));
             channel2.set(i, Math.sin(i + Math.PI));
         }

@@ -11,6 +11,8 @@ class AudioChannel
     private var samples:Vector<AudioSample>;
     /** Sample rate of the signal contained within **/
     public var sampleRate(default, null):Int;
+    /** Length of the samples **/
+    public var length(get, null):Int;
     
     private var sumOfSquaresThreshold:Float = 0.1;
 
@@ -24,6 +26,11 @@ class AudioChannel
         #if !static
         clear();
         #end
+    }
+
+    private function get_length():Int
+    {
+        return samples.length;
     }
 
     // TODO should have an otherStart parameter and honor it
