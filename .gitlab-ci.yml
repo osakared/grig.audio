@@ -1,0 +1,29 @@
+image: node:6.14.2
+
+before_script:
+ - npm install -g lix
+ - lix download
+
+test:
+  script:
+   - lix run travix python
+   - lix run travix node
+   - lix run travix js
+   - lix run travix java
+   - lix run travix cpp
+   - lix run travix cs
+   - lix run travix php
+   - lix run travix lua
+
+pages:
+  only:
+   - master
+  script:
+   - haxe doc.hxml
+   - rm -rf public
+   - mkdir public
+   - cp -R docs/* public/
+   - lix run dox -i bin -o public/api
+  artifacts:
+    paths:
+     - public
