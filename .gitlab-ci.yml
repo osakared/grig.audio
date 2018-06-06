@@ -1,15 +1,7 @@
-image: ubuntu:trusty
-
-before_script:
- - apt-get update
- - apt-get install -y curl
- - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
- - apt-get install -y nodejs python3
- - npm install -g lix
- - lix download
+image: osakared/haxe-ci
 
 test:
   script:
    - haxe tests.hxml --interp
-   - haxe tests.hxml -python bin/tests.py && python bin/tests.py
+   - haxe tests.hxml -python bin/tests.py && python3 bin/tests.py
 
