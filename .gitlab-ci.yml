@@ -4,5 +4,7 @@ test:
   script:
    - lix download
    - haxe tests.hxml --interp
-   - haxe tests.hxml -python bin/tests.py && python3 bin/tests.py
+   - haxe tests.hxml -python bin/tests.py           && python3 bin/tests.py
+   - haxe tests.hxml -lib hxnodejs -js bin/tests.js && node bin/tests.js
+   - haxe tests.hxml -java bin                      && java -jar bin/tests.jar
 
