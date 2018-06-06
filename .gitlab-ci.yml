@@ -6,18 +6,6 @@ before_script:
 
 test:
   script:
-   - haxe build tests.hxml --interp
-   - haxe build tests.hxml -python bin/tests.py && python bin/tests.py
+   - haxe tests.hxml --interp
+   - haxe tests.hxml -python bin/tests.py && python bin/tests.py
 
-pages:
-  only:
-   - master
-  script:
-   - haxe doc.hxml
-   - rm -rf public
-   - mkdir public
-   - cp -R docs/* public/
-   - lix run dox -i bin -o public/api
-  artifacts:
-    paths:
-     - public
