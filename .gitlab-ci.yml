@@ -6,14 +6,8 @@ before_script:
 
 test:
   script:
-   - lix run travix python
-   - lix run travix node
-   - lix run travix js
-   - lix run travix java
-   - lix run travix cpp
-   - lix run travix cs
-   - lix run travix php
-   - lix run travix lua
+   - haxe build tests.hxml -interp
+   - haxe build tests.hxml -python bin/tests.py && python bin/tests.py
 
 pages:
   only:
