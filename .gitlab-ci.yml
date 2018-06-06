@@ -1,7 +1,8 @@
 image: ubuntu:trusty
 
 before_script:
- - apt-get install -y python3
+ - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+ - apt-get install -y nodejs python3
  - npm install -g lix
  - lix download
 
