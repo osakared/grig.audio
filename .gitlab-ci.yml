@@ -2,6 +2,7 @@ image: osakared/haxe-ci
 
 test:
   script:
+   - lix download
    - haxe tests.hxml --interp
    - haxe tests.hxml -python bin/tests.py && python3 bin/tests.py
 
