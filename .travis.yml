@@ -3,7 +3,6 @@ sudo: required
 language: haxe
 
 os:
-  - linux
   - osx
 
 # you can specify futher versions as found at http://haxe.org/website-content/downloads/versions.json
@@ -17,14 +16,11 @@ matrix:
 
 install:
   - haxelib install travix
-  # to always use the latest version of travix comment out the previous line and uncomment the next
-  # - haxelib git travix https://github.com/back2dos/travix && pushd . && cd $(haxelib config)travix/git && haxe build-neko.hxml && popd
   - haxelib run travix install
 
 script:
   - haxelib run travix python
   - haxelib run travix node
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix js    ; fi
   - haxelib run travix java
   - haxelib run travix cpp
   - haxelib run travix cs
