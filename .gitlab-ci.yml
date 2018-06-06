@@ -3,6 +3,7 @@ image: osakared/haxe-ci
 before_script:
  - haxelib install hxcpp
  - haxelib install hxjava
+ - haxelib install hxcs
  - lix download
 
 test:
@@ -10,5 +11,8 @@ test:
    - haxe tests.hxml --interp
    - haxe tests.hxml -python bin/tests.py           && python3 bin/tests.py
    - haxe tests.hxml -lib hxnodejs -js bin/tests.js && node bin/tests.js
-   - haxe tests.hxml -java bin                      && java -jar bin/tests.jar
-
+   - haxe tests.hxml -java bin/java                 && java -jar bin/java/RunTests.jar
+   - haxe tests.hxml -cpp bin/cpp                   && ./bin/cpp/RunTests
+   - haxe tests.hxml -cs bin                        && mono bin/bin/RunTests.exe
+   - haxe tests.hxml -php bin/php                   && php bin/php/index.php
+   - haxe tests.hxml -lua bin/tests.lua             && lua bin/tests.lua
