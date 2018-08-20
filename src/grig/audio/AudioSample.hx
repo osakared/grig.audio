@@ -19,13 +19,13 @@ abstract AudioSample(Float) from Float to Float
     }
 
     @:op(A+B)
-    public inline function add(val:AudioSample)
+    public inline function add(val:Float):AudioSample
     {
         return new AudioSample(this + val);
     }
 
     @:op(A-B)
-    public inline function subtract(val:Float)
+    public inline function subtract(val:Float):AudioSample
     {
         return new AudioSample(this - val);
     }
