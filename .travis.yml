@@ -1,28 +1,24 @@
 sudo: required
+dist: trusty
 
-language: haxe
+language: node_js
+node_js: 6
 
 os:
+  - linux
   - osx
-
-# you can specify futher versions as found at http://haxe.org/website-content/downloads/versions.json
-haxe:
-  - "4.0.0-preview.3"
-  - development
-  
-matrix:
-  allow_failures:
-    - haxe: development
+  - windows
 
 install:
-  - haxelib install travix
-  - haxelib run travix install
+  - npm install -g lix
 
 script:
-  - haxelib run travix python
+  - lix download
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix python ; fi
   - haxelib run travix node
-  - haxelib run travix java
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix js       ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix java   ; fi
   - haxelib run travix cpp
   - haxelib run travix cs
-  - haxelib run travix php7
-  - haxelib run travix lua
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix php    ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix lua      ; fi
