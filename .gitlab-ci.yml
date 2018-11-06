@@ -1,13 +1,13 @@
 image: osakared/haxe-ci
-
+  
 before_script:
- - haxelib install hxcpp
- - haxelib install hxjava
- - haxelib install hxcs
- - lix download
 
 test:
   script:
+   - haxelib install hxcpp
+   - haxelib install hxjava
+   - haxelib install hxcs
+   - lix download
    - haxe tests.hxml --interp
    - haxe tests.hxml -python bin/tests.py           && python3 bin/tests.py
    - haxe tests.hxml -lib hxnodejs -js bin/tests.js && node bin/tests.js
@@ -16,3 +16,8 @@ test:
    - haxe tests.hxml -cs bin                        && mono bin/bin/RunTests.exe
    - haxe tests.hxml -php bin/php                   && php bin/php/index.php
    - haxe tests.hxml -lua bin/tests.lua             && lua bin/tests.lua
+
+trigger_build:
+  stage: deploy
+  script:
+    - "curl -X POST -F \"token=$CI_JOB_TOKEN\" -F ref=master https://gitlab.com/api/v4/projects/6741415/trigger/pipeline"
