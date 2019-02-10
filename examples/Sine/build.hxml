@@ -1,0 +1,6 @@
+-cp src
+-cp ../../src
+-dce no
+-lib tink_core
+-main Main
+# -js bin/Sine.js

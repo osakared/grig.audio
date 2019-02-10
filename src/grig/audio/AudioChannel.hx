@@ -32,25 +32,25 @@ abstract AudioChannel(AudioChannelData)
 
     }
 
-    // // TODO should have an otherStart parameter and honor it
-    // /**
-    //     Adds `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
-    //     Values are summed.
-    // **/
-    // public function addInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
-    // {
-    //     // Why doesn't haxe have max/min for ints?
-    //     var minLength = samples.length > other.samples.length ? other.samples.length : samples.length;
-    //     if (sourceStart < 0) sourceStart = 0;
-    //     else if (sourceStart > minLength) sourceStart = minLength;
-    //     if (length == null || sourceStart + length > minLength) {
-    //         length = minLength - sourceStart;
-    //     }
-    //     // This is ripe for optimization.. but be careful about not breaking targets
-    //     for (i in sourceStart...(sourceStart + length)) {
-    //         other.samples[i] = other.samples[i] + samples[i];
-    //     }
-    // }
+    // TODO should have an otherStart parameter and honor it
+    /**
+        Adds `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
+        Values are summed.
+    **/
+    public inline function addInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
+    {
+        // Why doesn't haxe have max/min for ints?
+        var minLength = this.length > other.length ? other.length : this.length;
+        if (sourceStart < 0) sourceStart = 0;
+        else if (sourceStart > minLength) sourceStart = minLength;
+        if (length == null || sourceStart + length > minLength) {
+            length = minLength - sourceStart;
+        }
+        // This is ripe for optimization.. but be careful about not breaking targets
+        for (i in sourceStart...(sourceStart + length)) {
+            other[i] = other[i] + this[i];
+        }
+    }
 
     // // TODO should have an otherStart parameter and honor it
     // /**
@@ -60,13 +60,13 @@ abstract AudioChannel(AudioChannelData)
     // public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
     // {
     //     // Kinda violating DRY here
-    //     var minLength = samples.length > other.samples.length ? other.samples.length : samples.length;
+    //     var minLength = this.length > other.length ? other.length : this.length;
     //     if (sourceStart < 0) sourceStart = 0;
     //     else if (sourceStart > minLength) sourceStart = minLength;
     //     if (length == null || sourceStart + length > minLength) {
     //         length = minLength - sourceStart;
     //     }
-    //     Vector.blit(samples, sourceStart, other.samples, sourceStart, length);
+    //     Vector.blit(this, sourceStart, other, sourceStart, length);
     // }
 
     // /** Multiply all values in the signal by gain **/
@@ -104,26 +104,26 @@ abstract AudioChannel(AudioChannelData)
     //     #end
     // }
 
-    // /** Sum of squares of the data. A quick and dirty way to check energy level **/
-    // public function sumOfSquares():Float
-    // {
-    //     var sum:Float = 0.0;
-    //     for (i in 0...samples.length) {
-    //         sum += samples[i];
-    //     }
-    //     var avg:Float = sum / samples.length;
-    //     var squaresSum:Float = 0.0;
-    //     for (i in 0...samples.length) {
-    //         squaresSum += Math.pow(samples[i] - avg, 2.0);
-    //     }
-    //     return squaresSum;
-    // }
+    /** Sum of squares of the data. A quick and dirty way to check energy level **/
+    public function sumOfSquares():Float
+    {
+        var sum:Float = 0.0;
+        for (i in 0...this.length) {
+            sum += this[i];
+        }
+        var avg:Float = sum / this.length;
+        var squaresSum:Float = 0.0;
+        for (i in 0...this.length) {
+            squaresSum += Math.pow(this[i] - avg, 2.0);
+        }
+        return squaresSum;
+    }
 
-    // /** Uses sum of squares to determine sufficiently low energy **/
-    // public function isSilent():Bool
-    // {
-    //     return sumOfSquares() < sumOfSquaresThreshold;
-    // }
+    /** Uses sum of squares to determine sufficiently low energy **/
+    public function isSilent():Bool
+    {
+        return sumOfSquares() < sumOfSquaresThreshold;
+    }
 
     // // The lack of @arrayAccess on non-abstract is maddening
     // /** Get the value of the sample pointed at by `index` **/
