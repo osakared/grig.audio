@@ -1,4 +1,4 @@
-package grig.audio.js.webaudio;  #if (js && !nodejs)
+package grig.audio.js.webaudio; #if (js && !nodejs)
 
 import grig.audio.AudioCallback;
 import js.html.audio.AudioContext;
@@ -24,7 +24,7 @@ class AudioInterface
     private function handleAudioEvent(event:AudioProcessingEvent)
     {
         if (audioCallback != null) {
-            audioCallback(event.inputBuffer, event.outputBuffer);
+            audioCallback(new AudioBuffer(event.inputBuffer), new AudioBuffer(event.outputBuffer));
         }
     }
 
@@ -88,7 +88,7 @@ class AudioInterface
                 });
             }
             catch (error:Error) {
-                _callback(Failure(new Error(InternalError, 'Failed to open port. $error.message')));
+                _callback(Failure(new Error(InternalError, 'Failed to open port. ${error.message}')));
             }
         });
     }
