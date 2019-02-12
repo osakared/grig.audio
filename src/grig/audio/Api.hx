@@ -4,12 +4,14 @@ package grig.audio;
 enum Api {
     Unspecified;
     Alsa;
-    Pulse;
+    Jack;
     Oss;
     MacOSCore;
     WindowsWASAPI;
     WindowsASIO;
     WindowsDS;
+    WindowsWDMKS;
+    WindowsMME; // Will this fucking ever come up?!!
     Dummy;
     Browser;
 }

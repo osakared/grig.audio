@@ -5,6 +5,7 @@ typedef AudioInterface = NativeChannelAudioInterface;
 #elseif (js && !nodejs)
 typedef AudioInterface = grig.audio.js.webaudio.AudioInterface;
 #elseif cpp
+typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
 #else
 
 extern class AudioInterface

@@ -10,16 +10,29 @@ import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
 
+typedef WorkletPorts = Array<Array<js.html.Float32Array>>;
+
 // class CallbackProcessor extends js.html.audio.AudioWorkletProcessor // Will this fail at runtime upon declaration or instantiation if worklet interface is missing?
 // {
-//     private var audioInterface:AudioInterface()
+//     private var audioInterface:AudioInterface;
+
+//     public function process(input:WorkletPorts, output:WorkletPorts, params:Dynamic):Bool
+//     {
+//         trace('a');
+//         return true;
+//     }
+
+//     public function new(_audioInterface:AudioInterface)
+//     {
+//         audioInterface = _audioInterface;
+//         super();
+//     }
 // }
 
 class AudioInterface
 {
     private var audioCallback:AudioCallback;
     public var audioContext(default, null):AudioContext;
-    private var node:ScriptProcessorNode;
 
     private function handleAudioEvent(event:AudioProcessingEvent)
     {
@@ -77,7 +90,7 @@ class AudioInterface
                         }
                     }
                     // Try to create AudioWorklet, fall back to ScriptProcessor on DOMError
-                    node = audioContext.createScriptProcessor(options.latencySamples, options.inputNumChannels, options.outputNumChannels);
+                    var node = audioContext.createScriptProcessor(options.latencySamples, options.inputNumChannels, options.outputNumChannels);
                     node.connect(audioContext.destination);
                     node.onaudioprocess = handleAudioEvent;
                     if (inputNode != null) inputNode.connect(node);
