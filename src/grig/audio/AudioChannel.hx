@@ -87,24 +87,24 @@ abstract AudioChannel(AudioChannelData)
     //     return newChannel;
     // }
 
-    // /** Set all values in the signal to `value` **/
-    // public function setAll(value:Float)
-    // {
-    //     // If only I could use memset here..
-    //     for (i in 0...samples.length) {
-    //         samples[i] = value;
-    //     }
-    // }
+    /** Set all values in the signal to `value` **/
+    public function setAll(value:Float)
+    {
+        // If only I could use memset here..
+        for (i in 0...this.length) {
+            this[i] = value;
+        }
+    }
 
-    // /** Resets the buffer to silence (all `0.0`) **/
-    // public function clear()
-    // {
-    //     #if cpp
-    //     cpp.NativeArray.zero(cast samples, 0, samples.length);
-    //     #else
-    //     setAll(0.0);
-    //     #end
-    // }
+    /** Resets the buffer to silence (all `0.0`) **/
+    public function clear()
+    {
+        #if cpp
+        cpp.NativeArray.zero(cast this, 0, this.length);
+        #else
+        setAll(0.0);
+        #end
+    }
 
     /** Sum of squares of the data. A quick and dirty way to check energy level **/
     public function sumOfSquares():Float

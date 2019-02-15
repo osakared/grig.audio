@@ -46,6 +46,7 @@ extern class PaStreamParameters
     public var channelCount:Int;
     public var sampleFormat:cpp.SizeT;
     public var suggestedLatency:cpp.Float64;
+    public var hostApiSpecificStreamInfo:cpp.RawPointer<cpp.Void>;
 }
 
 typedef PaStream = cpp.RawPointer<cpp.Void>;
@@ -129,8 +130,8 @@ class PAAudioInterface
     private static function handleAudioEvent(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCount:cpp.SizeT,
                                              timeInfo:PaStreamCallbackTimeInfo, statusFlags:cpp.SizeT, userData:cpp.RawPointer<cpp.Void>):Int
     {
-        var i:cpp.UInt64 = untyped __cpp__('(unsigned long)userData');
-        var audioInterface = audioInterfaces[i];
+        var interfaceIndex:cpp.UInt64 = untyped __cpp__('(unsigned long)userData');
+        var audioInterface = audioInterfaces[interfaceIndex];
         if (audioInterface.audioCallback == null) return 0;
 
         // God I hope I'm not creating too much overhead here
@@ -138,6 +139,7 @@ class PAAudioInterface
         var inputConstFloat:cpp.RawConstPointer<cpp.RawPointer<cpp.Float32>> = untyped __cpp__('(const float**)input');
         for (i in 0...audioInterface.inputNumChannels) {
             var inputArray = cpp.NativeArray.create(0);
+            // I'm having to type out the raw c++ here just because some bug in haxe is preventing the global scoping right now
             var inputConstPointer:cpp.ConstPointer<cpp.Float32> = untyped __cpp__('::cpp::Pointer_obj::fromRaw(inputConstFloat[{0}])', i); //cpp.ConstPointer.fromRaw(inputConstFloat);
             inputArray.setUnmanagedData(inputConstPointer, frameCount);
             var inputVector = Vector.fromData(inputArray);
@@ -147,12 +149,14 @@ class PAAudioInterface
 
         var outputChannels = new Array<AudioChannel>();
         var outputFloat:cpp.RawPointer<cpp.RawPointer<cpp.Float32>> = untyped __cpp__('(float**)output');
-        for (i in 0...2) {
+        for (i in 0...audioInterface.outputNumChannels) {
             var outputArray = cpp.NativeArray.create(0);
             var outputPointer:cpp.Pointer<cpp.Float32> = untyped __cpp__('::cpp::Pointer_obj::fromRaw(outputFloat[{0}])', i);
             outputArray.setUnmanagedData(outputPointer, frameCount);
             var outputVector = Vector.fromData(outputArray);
-            outputChannels.push(new AudioChannel(outputVector));
+            var outputChannel = new AudioChannel(outputVector);
+            outputChannel.clear(); // Why do I have to do this to avoid a buzzing sound?
+            outputChannels.push(outputChannel);
         }
         var outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
 
@@ -310,19 +314,40 @@ class PAAudioInterface
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>
     {
         return Future.async(function(_callback) {
+            var inputParameters:PaStreamParameters = untyped __cpp__('nullptr');
+            var outputParameters:PaStreamParameters = untyped __cpp__('nullptr');
             try {
                 if (isOpen) throw 'Already opened port';
                 processOptions(options);
-                var ret = PortAudio.openDefaultStream(cpp.RawPointer.addressOf(stream), inputNumChannels, outputNumChannels,
-                                            untyped __cpp__('paFloat32 | paNonInterleaved'), sampleRate, latencySamples,
-                                            cpp.Function.fromStaticFunction(handleAudioEvent), untyped __cpp__('(void*){0}', audioInterfaceIndex));
+                var sampleFormat:cpp.SizeT = untyped __cpp__('paFloat32 | paNonInterleaved');
+                if (inputPort != null) {
+                    inputParameters = untyped __cpp__('new PaStreamParameters');
+                    inputParameters.device = inputPort;
+                    inputParameters.channelCount = inputNumChannels;
+                    inputParameters.sampleFormat = sampleFormat;
+                    inputParameters.suggestedLatency = 0.2;
+                    inputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
+                }
+                if (outputPort != null) {
+                    outputParameters = untyped __cpp__('new PaStreamParameters');
+                    outputParameters.device = outputPort;
+                    outputParameters.channelCount = outputNumChannels;
+                    outputParameters.sampleFormat = sampleFormat;
+                    outputParameters.suggestedLatency = 0.2;
+                    outputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
+                }
+                var ret = PortAudio.openStream(cpp.RawPointer.addressOf(stream), inputParameters, outputParameters,
+                                               sampleRate, latencySamples, 0,
+                                               cpp.Function.fromStaticFunction(handleAudioEvent), untyped __cpp__('(void*){0}', audioInterfaceIndex));
                 checkError(ret);
                 ret = PortAudio.startStream(stream);
                 checkError(ret);
                 isOpen = true;
+                untyped __cpp__('delete {0}; delete {1};', inputParameters, outputParameters);
                 _callback(Success(this));
             }
             catch (error:Error) {
+                untyped __cpp__('delete {0}; delete {1};', inputParameters, outputParameters);
                 _callback(Failure(new Error(InternalError, 'Failed to open port. ${error.message}')));
             }
         });

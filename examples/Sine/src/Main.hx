@@ -63,7 +63,7 @@ class Main
             if (port.isDefaultOutput) {
                 options.outputNumChannels = port.maxOutputChannels;
                 options.outputPort = port.portID;
-                options.sampleRate = port.defaultSampleRate;
+                options.sampleRate = port.defaultSampleRate; // if input and output are different samplerates (would that happen?) then this code will fail
             }
         }
         if (options.inputPort != null) audioInterface.setCallback(audioCallbackWithInput);
@@ -71,7 +71,7 @@ class Main
         audioInterface.openPort(options).handle(function(audioOutcome) {
             switch audioOutcome {
                 case Success(_):
-                    trace('Playing sine wave combined with input...');
+                    trace('Playing sine wave combined with input (if available)...');
                     mainLoop(audioInterface);
                 case Failure(error):
                     trace(error);
