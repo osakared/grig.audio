@@ -1,0 +1,3 @@
+-D hxsdl=0.0.0
+# @install: lix --silent download "gh://github.com/ncannasse/hxsdl#33d9d0a6278ac1fc18e3f4c28d6ef5d438070420" into hxsdl/0.0.0/github/33d9d0a6278ac1fc18e3f4c28d6ef5d438070420
+-cp ${HAXE_LIBCACHE}/hxsdl/0.0.0/github/33d9d0a6278ac1fc18e3f4c28d6ef5d438070420/
