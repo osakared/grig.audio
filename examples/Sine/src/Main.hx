@@ -11,12 +11,21 @@ class Main
 
     private static var phase:Float;
 
+    private static function audioCallbackWithInput(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer)
+    {
+        var channel = output.channels[0];
+        for (i in 0...channel.length) {
+            phase += 0.01;
+            channel[i] = Math.sin(phase) * 0.3 + input.channels[0][i] * 0.3;
+        }
+    }
+
     private static function audioCallback(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer)
     {
         var channel = output.channels[0];
         for (i in 0...channel.length) {
             phase += 0.01;
-            channel[i] = Math.sin(phase);// * 0.3 + input.channels[0][i];
+            channel[i] = Math.sin(phase);
         }
     }
 
@@ -30,7 +39,7 @@ class Main
         while (true) {
             var command = stdin.readLine();
             if (command.toLowerCase() == 'quit') {
-                // audioInterface.closePort();
+                audioInterface.closePort();
                 return;
             }
         }
@@ -42,8 +51,24 @@ class Main
         phase = 0.0;
         trace(AudioInterface.getApis());
         var audioInterface = new AudioInterface();
-        audioInterface.setCallback(audioCallback);
-        audioInterface.openPort({inputNumChannels: 0, latencySamples: 1024}).handle(function(audioOutcome) {
+        var ports = audioInterface.getPorts();
+        trace(ports);
+        var options:grig.audio.AudioInterfaceOptions = {};
+        for (port in ports) {
+            if (port.isDefaultInput) {
+                options.inputNumChannels = port.maxInputChannels;
+                options.inputPort = port.portID;
+                options.sampleRate = port.defaultSampleRate;
+            }
+            if (port.isDefaultOutput) {
+                options.outputNumChannels = port.maxOutputChannels;
+                options.outputPort = port.portID;
+                options.sampleRate = port.defaultSampleRate;
+            }
+        }
+        if (options.inputPort != null) audioInterface.setCallback(audioCallbackWithInput);
+        else audioInterface.setCallback(audioCallback);
+        audioInterface.openPort(options).handle(function(audioOutcome) {
             switch audioOutcome {
                 case Success(_):
                     trace('Playing sine wave combined with input...');

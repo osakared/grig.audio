@@ -10,8 +10,15 @@ typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
 
 extern class AudioInterface
 {
+    public var isOpen(default, null):Bool = false;
+
     public function new(api:grig.audio.Api = grig.audio.Api.Undefined);
     public static function getApis():Array<grig.audio.Api>;
+    public function getPorts():Array<PortInfo>;
+    public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>;
+    public function closePort():Void;
+    public function setCallback(_audioCallback:AudioCallback):Void;
+    public function cancelCallback():Void;
 }
 
 #end

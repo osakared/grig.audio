@@ -4,6 +4,8 @@ import haxe.ds.Vector;
 
 #if (js && !nodejs && !heaps)
 typedef AudioChannelData = js.html.Float32Array;
+#elseif cpp
+typedef AudioChannelData = haxe.ds.Vector<cpp.Float32>;
 #else
 typedef AudioChannelData = haxe.io.Float32Array;
 #end
