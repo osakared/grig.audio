@@ -1,17 +1,15 @@
 package;
 
 import grig.audio.AudioInterface;
-
 import haxe.Timer;
-
 import tink.core.Future;
 
 class Main
 {
 
-    private static var phase:Float;
+    private static var phase:Float = 0.0;
 
-    private static function audioCallbackWithInput(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer)
+    private static function audioCallbackWithInput(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
         var channel = output.channels[0];
         for (i in 0...channel.length) {
@@ -20,7 +18,7 @@ class Main
         }
     }
 
-    private static function audioCallback(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer)
+    private static function audioCallback(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
         var channel = output.channels[0];
         for (i in 0...channel.length) {
@@ -48,7 +46,6 @@ class Main
 
     static function main()
     {
-        phase = 0.0;
         trace(AudioInterface.getApis());
         var audioInterface = new AudioInterface();
         var ports = audioInterface.getPorts();
@@ -59,11 +56,13 @@ class Main
                 options.inputNumChannels = port.maxInputChannels;
                 options.inputPort = port.portID;
                 options.sampleRate = port.defaultSampleRate;
+                options.inputLatency = port.defaultLowInputLatency;
             }
             if (port.isDefaultOutput) {
                 options.outputNumChannels = port.maxOutputChannels;
                 options.outputPort = port.portID;
                 options.sampleRate = port.defaultSampleRate; // if input and output are different samplerates (would that happen?) then this code will fail
+                options.outputLatency = port.defaultLowOutputLatency;
             }
         }
         if (options.inputPort != null) audioInterface.setCallback(audioCallbackWithInput);

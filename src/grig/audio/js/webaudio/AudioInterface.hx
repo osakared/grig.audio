@@ -72,7 +72,7 @@ class AudioInterface
     {
         if (options.inputNumChannels == null) options.inputNumChannels = 0; // default to not asking for mic access
         if (options.outputNumChannels == null) options.outputNumChannels = audioContext.destination.channelCount;
-        if (options.latencySamples == null) options.latencySamples = 0; // 0 signifies let browser choose for me
+        if (options.bufferSize == null) options.bufferSize = 0; // 0 signifies let browser choose for me
     }
 
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>
@@ -90,7 +90,7 @@ class AudioInterface
                         }
                     }
                     // Try to create AudioWorklet, fall back to ScriptProcessor on DOMError
-                    var node = audioContext.createScriptProcessor(options.latencySamples, options.inputNumChannels, options.outputNumChannels);
+                    var node = audioContext.createScriptProcessor(options.bufferSize, options.inputNumChannels, options.outputNumChannels);
                     node.connect(audioContext.destination);
                     node.onaudioprocess = handleAudioEvent;
                     if (inputNode != null) inputNode.connect(node);

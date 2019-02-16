@@ -10,6 +10,8 @@ typedef PortInfo =
     var maxInputChannels:Int;
     var maxOutputChannels:Int;
     var defaultSampleRate:Float;
-    // It would be great to have all supported sample rates too...
-    // var defaultLatency:Float;
+    @:optional var defaultLowInputLatency:Float;
+    @:optional var defaultLowOutputLatency:Float;
+    @:optional var defaultHighInputLatency:Float;
+    @:optional var defaultHighOutputLatency:Float;
 }

@@ -4,6 +4,7 @@ import cpp.vm.Gc;
 import grig.audio.AudioBuffer;
 import grig.audio.AudioCallback;
 import grig.audio.AudioChannel;
+import grig.audio.AudioTime;
 import grig.audio.PortInfo;
 import haxe.ds.Vector;
 import tink.core.Error;
@@ -119,13 +120,21 @@ class PAAudioInterface
     private var inputNumChannels:Int;
     private var outputNumChannels:Int;
     private var sampleRate:Float;
-    private var latencySamples:Int;
+    private var bufferSize:Int;
     private var inputPort:Null<Int>;
     private var outputPort:Null<Int>;
+    private var inputLatency:Float;
+    private var outputLatency:Float;
 
     // Can't seem to reliably pass around a pointer to a PAAudioInterface_obj, so index into here it is!
     static private var audioInterfaces:Array<PAAudioInterface> = new Array<PAAudioInterface>();
     private var audioInterfaceIndex:cpp.UInt64;
+
+    private static var inputUnderflowFlag:Int = untyped __cpp__('paInputUnderflow');
+    private static var inputOverflowFlag:Int = untyped __cpp__('paInputOverflow');
+    private static var outputUnderflowFlag:Int = untyped __cpp__('paOutputUnderflow');
+    private static var outputOverflowFlag:Int = untyped __cpp__('paOutputOverflow');
+    private static var primingOutputFlag:Int = untyped __cpp__('paPrimingOutput');
 
     private static function handleAudioEvent(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCount:cpp.SizeT,
                                              timeInfo:PaStreamCallbackTimeInfo, statusFlags:cpp.SizeT, userData:cpp.RawPointer<cpp.Void>):Int
@@ -160,7 +169,17 @@ class PAAudioInterface
         }
         var outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
 
-        audioInterface.audioCallback(inputBuffer, outputBuffer);
+        var streamInfo = new grig.audio.AudioStreamInfo();
+        streamInfo.inputUnderflow = statusFlags & inputUnderflowFlag != 0;
+        streamInfo.inputOverflow = statusFlags & inputOverflowFlag != 0;
+        streamInfo.outputUnderflow = statusFlags & outputUnderflowFlag != 0;
+        streamInfo.outputOverflow = statusFlags & outputOverflowFlag != 0;
+        streamInfo.primingOutput = statusFlags & primingOutputFlag != 0;
+        streamInfo.inputTime = new AudioTime(timeInfo.inputBufferAdcTime);
+        streamInfo.outputTime = new AudioTime(timeInfo.outputBufferDacTime);
+        streamInfo.callbackTime = new AudioTime(timeInfo.currentTime);
+
+        audioInterface.audioCallback(inputBuffer, outputBuffer, audioInterface.sampleRate, streamInfo);
         
         return 0;
     }
@@ -288,6 +307,10 @@ class PAAudioInterface
                         defaultSampleRate: deviceInfo.defaultSampleRate,
                         isDefaultInput: deviceIndex == apiInfo.defaultInputDevice,
                         isDefaultOutput: deviceIndex == apiInfo.defaultOutputDevice,
+                        defaultLowInputLatency: deviceInfo.defaultLowInputLatency,
+                        defaultLowOutputLatency: deviceInfo.defaultLowOutputLatency,
+                        defaultHighInputLatency: deviceInfo.defaultHighInputLatency,
+                        defaultHighOutputLatency: deviceInfo.defaultHighOutputLatency,
                     };
                     portInfos.push(portInfo);
                 }
@@ -305,8 +328,12 @@ class PAAudioInterface
         else outputNumChannels = 2;
         if (options.sampleRate != null) sampleRate = options.sampleRate;
         else sampleRate = 44100.0;
-        if (options.latencySamples != null) latencySamples = options.latencySamples;
-        else latencySamples = 256;
+        if (options.bufferSize != null) bufferSize = options.bufferSize;
+        else bufferSize = 256;
+        if (options.inputLatency != null) inputLatency = options.inputLatency;
+        else inputLatency = 0.01;
+        if (options.outputLatency != null) outputLatency = options.outputLatency;
+        else outputLatency = 0.01;
         inputPort = options.inputPort;
         outputPort = options.outputPort;
     }
@@ -325,7 +352,7 @@ class PAAudioInterface
                     inputParameters.device = inputPort;
                     inputParameters.channelCount = inputNumChannels;
                     inputParameters.sampleFormat = sampleFormat;
-                    inputParameters.suggestedLatency = 0.2;
+                    inputParameters.suggestedLatency = inputLatency;
                     inputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
                 }
                 if (outputPort != null) {
@@ -333,11 +360,11 @@ class PAAudioInterface
                     outputParameters.device = outputPort;
                     outputParameters.channelCount = outputNumChannels;
                     outputParameters.sampleFormat = sampleFormat;
-                    outputParameters.suggestedLatency = 0.2;
+                    outputParameters.suggestedLatency = outputLatency;
                     outputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
                 }
                 var ret = PortAudio.openStream(cpp.RawPointer.addressOf(stream), inputParameters, outputParameters,
-                                               sampleRate, latencySamples, 0,
+                                               sampleRate, bufferSize, 0,
                                                cpp.Function.fromStaticFunction(handleAudioEvent), untyped __cpp__('(void*){0}', audioInterfaceIndex));
                 checkError(ret);
                 ret = PortAudio.startStream(stream);

@@ -7,5 +7,7 @@ typedef AudioInterfaceOptions =
 	@:optional var inputNumChannels:Int;
 	@:optional var outputNumChannels:Int;
     @:optional var sampleRate:Float;
-    @:optional var latencySamples:Int;
+    @:optional var bufferSize:Int;
+    @:optional var inputLatency:Float;
+    @:optional var outputLatency:Float;
 }

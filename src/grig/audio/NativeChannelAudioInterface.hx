@@ -49,7 +49,7 @@ class NativeChannelAudioInterface
 
     private function fillMissingOptions(options:AudioInterfaceOptions)
     {
-        if (options.latencySamples == null) options.latencySamples = 256;
+        if (options.bufferSize == null) options.bufferSize = 256;
         if (options.inputNumChannels > 0) throw 'No input support in NativeChannelAudioInterface';
         if (options.outputNumChannels > 1) throw 'Only support for one channel in NativeChannelAudioInterface';
     }
@@ -59,7 +59,7 @@ class NativeChannelAudioInterface
         return Future.async(function(_callback) {
             try {
                 fillMissingOptions(options);
-                var nativeChannel = new CallbackNativeChannel(options.latencySamples, this);
+                var nativeChannel = new CallbackNativeChannel(options.bufferSize, this);
                 _callback(Success(this));
             }
             catch (error:Error) {
