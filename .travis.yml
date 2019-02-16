@@ -17,8 +17,8 @@ script:
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix python ; fi
   - haxelib run travix node
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix js       ; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix java   ; fi
+  -# if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix java   ; fi
   - haxelib run travix cpp
-  - haxelib run travix cs
+  -# haxelib run travix cs
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix php    ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix lua      ; fi
