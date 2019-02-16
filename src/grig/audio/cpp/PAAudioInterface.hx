@@ -89,6 +89,9 @@ extern class PortAudio
     static public function getHostApiCount():Int;
     @:native("Pa_GetHostApiInfo")
     static public function getHostApiInfo(api:Int):PaHostApiInfo;
+    @:native("Pa_IsFormatSupported")
+    static public function isFormatSupported(inputParams:PaStreamParameters, outputParams:PaStreamParameters,
+                                             sampleRate:cpp.Float64):Int;
     @:native("Pa_OpenDefaultStream")
     static public function openDefaultStream(stream:cpp.RawPointer<PaStream>, numInputChannels:Int, numOutputChannels:Int,
                                              sampleFormat:cpp.SizeT, sampleRate:cpp.Float64, framesPerBuffer:cpp.SizeT,
@@ -288,6 +291,40 @@ class PAAudioInterface
         return apis;
     }
 
+    private function addSampleRatesToPortInfo(portInfo:PortInfo):Void
+    {
+        var inputParameters:PaStreamParameters = untyped __cpp__('nullptr');
+        var outputParameters:PaStreamParameters = untyped __cpp__('nullptr');
+
+        var sampleFormat:cpp.SizeT = untyped __cpp__('paFloat32 | paNonInterleaved');
+        // Base our estimate on full duplex (if available), all channels
+        if (portInfo.maxInputChannels > 0) {
+            inputParameters = untyped __cpp__('new PaStreamParameters');
+            inputParameters.device = portInfo.portID;
+            inputParameters.channelCount = portInfo.maxInputChannels;
+            inputParameters.sampleFormat = sampleFormat;
+            inputParameters.suggestedLatency = portInfo.defaultLowInputLatency;
+            inputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
+        }
+        if (portInfo.maxOutputChannels > 0) {
+            outputParameters = untyped __cpp__('new PaStreamParameters');
+            outputParameters.device = portInfo.portID;
+            outputParameters.channelCount = portInfo.maxOutputChannels;
+            outputParameters.sampleFormat = sampleFormat;
+            outputParameters.suggestedLatency = portInfo.defaultLowOutputLatency;
+            outputParameters.hostApiSpecificStreamInfo = untyped __cpp__('nullptr');
+        }
+
+        // This is kind of brain dead because I'd rather not assume just because a given sampleRate
+        // is higher than the default but not supported, that yet higher sampleRates aren't (for example)
+        for (sampleRate in grig.audio.SampleRate.commonSampleRates) {
+            var ret = PortAudio.isFormatSupported(inputParameters, outputParameters, sampleRate);
+            if (ret == 0) portInfo.sampleRates.push(sampleRate);
+        }
+
+        untyped __cpp__('delete {0}; delete {1};', inputParameters, outputParameters);
+    }
+
     public function getPorts():Array<PortInfo>
     {
         var portInfos = new Array<PortInfo>();
@@ -311,7 +348,9 @@ class PAAudioInterface
                         defaultLowOutputLatency: deviceInfo.defaultLowOutputLatency,
                         defaultHighInputLatency: deviceInfo.defaultHighInputLatency,
                         defaultHighOutputLatency: deviceInfo.defaultHighOutputLatency,
+                        sampleRates: new Array<Float>(),
                     };
+                    addSampleRatesToPortInfo(portInfo);
                     portInfos.push(portInfo);
                 }
                 break;
@@ -343,10 +382,11 @@ class PAAudioInterface
         return Future.async(function(_callback) {
             var inputParameters:PaStreamParameters = untyped __cpp__('nullptr');
             var outputParameters:PaStreamParameters = untyped __cpp__('nullptr');
+            // I can't just make this a static because the haxe compiler does something whacky that tries to pass this through a Dynamic, which fails to compile in C++
+            var sampleFormat:cpp.SizeT = untyped __cpp__('paFloat32 | paNonInterleaved');
             try {
                 if (isOpen) throw 'Already opened port';
                 processOptions(options);
-                var sampleFormat:cpp.SizeT = untyped __cpp__('paFloat32 | paNonInterleaved');
                 if (inputPort != null) {
                     inputParameters = untyped __cpp__('new PaStreamParameters');
                     inputParameters.device = inputPort;
