@@ -42,6 +42,11 @@ class Main
             }
         }
         #end
+
+        // Uncomment to test closing in js
+        // haxe.Timer.delay(function() {
+        //     audioInterface.closePort();
+        // }, 5000);
     }
 
     static function main()

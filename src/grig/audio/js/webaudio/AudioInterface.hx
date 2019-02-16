@@ -4,6 +4,7 @@ import grig.audio.AudioCallback;
 import js.html.audio.AudioContext;
 import js.html.audio.AudioNode;
 import js.html.audio.AudioProcessingEvent;
+import js.html.audio.AudioWorkletNodeOptions;
 import js.html.audio.MediaStreamAudioSourceNode;
 import js.html.audio.ScriptProcessorNode;
 import tink.core.Error;
@@ -22,7 +23,7 @@ typedef WorkletPorts = Array<Array<js.html.Float32Array>>;
 //         return true;
 //     }
 
-//     public function new(_audioInterface:AudioInterface)
+//     public function new(_audioInterface:AudioInterface, ?options:AudioWorkletNodeOptions)
 //     {
 //         audioInterface = _audioInterface;
 //         super();
@@ -33,12 +34,20 @@ class AudioInterface
 {
     private var audioCallback:AudioCallback;
     public var audioContext(default, null):AudioContext;
+    public var isOpen(default, null):Bool = false;
+    private var sampleRate:Float;
+    private var processor:AudioNode;
 
     private function handleAudioEvent(event:AudioProcessingEvent)
     {
-        if (audioCallback != null) {
-            audioCallback(new AudioBuffer(event.inputBuffer), new AudioBuffer(event.outputBuffer));
-        }
+        if (audioCallback == null) return;
+
+        var streamInfo = new grig.audio.AudioStreamInfo();
+        var currentTime:Float = js.Syntax.code('{0}.currentTime', audioContext);
+        streamInfo.inputTime = new AudioTime(currentTime);
+        streamInfo.outputTime = new AudioTime(event.playbackTime);
+        streamInfo.callbackTime = new AudioTime(currentTime);
+        audioCallback(new AudioBuffer(event.inputBuffer), new AudioBuffer(event.outputBuffer), event.outputBuffer.sampleRate, streamInfo);
     }
 
     public function new(api:grig.audio.Api = grig.audio.Api.Unspecified)
@@ -48,11 +57,28 @@ class AudioInterface
         }
 
         audioContext = new AudioContext();
+        sampleRate = js.Syntax.code('{0}.sampleRate', audioContext);
     }
 
     public static function getApis():Array<Api>
     {
         return [Api.Browser];
+    }
+
+    public function getPorts():Array<PortInfo>
+    {
+        return [
+            {
+                portID: 0, // ignored
+                portName: 'Default port',
+                isDefaultInput: true,
+                isDefaultOutput: true,
+                maxInputChannels: 2, // Cannot be determined accurately without requesting audio access first, which would be premature here
+                maxOutputChannels: 2,
+                defaultSampleRate: sampleRate,
+                sampleRates: [sampleRate], // Firefox alone supports additional, but it's simply resampling so what's the point?
+            }
+        ];
     }
 
     private function requestAudioAccess(options:AudioInterfaceOptions):js.Promise<Null<MediaStreamAudioSourceNode>>
@@ -79,6 +105,7 @@ class AudioInterface
     {
         return Future.async(function(_callback) {
             try {
+                if (isOpen) throw 'Already opened port';
                 fillMissingOptions(options);
                 if (options.outputNumChannels > audioContext.destination.channelCount) {
                     _callback(Failure(new Error(InternalError, 'Unsupported number of output channels: ${options.outputNumChannels}')));
@@ -89,12 +116,16 @@ class AudioInterface
                             _callback(Failure(new Error(InternalError, 'Unsupported number of input channels: ${options.inputNumChannels}')));
                         }
                     }
-                    // Try to create AudioWorklet, fall back to ScriptProcessor on DOMError
-                    var node = audioContext.createScriptProcessor(options.bufferSize, options.inputNumChannels, options.outputNumChannels);
-                    node.connect(audioContext.destination);
-                    node.onaudioprocess = handleAudioEvent;
-                    if (inputNode != null) inputNode.connect(node);
+                    // // Try to create AudioWorklet, fall back to ScriptProcessor on DOMError
+                    // var workletGlobalScope:js.html.audio.AudioWorkletGlobalScope = js.Syntax.code('{0}.audioWorklet', audioContext);
 
+                    var scriptProcessor = audioContext.createScriptProcessor(options.bufferSize, options.inputNumChannels, options.outputNumChannels);
+                    scriptProcessor.connect(audioContext.destination);
+                    scriptProcessor.onaudioprocess = handleAudioEvent;
+                    if (inputNode != null) inputNode.connect(scriptProcessor);
+                    processor = scriptProcessor;
+
+                    isOpen = true;
                     _callback(Success(this));
                 }).catchError(function(e:js.Error) {
                     _callback(Failure(new Error(InternalError, e.message)));
@@ -104,6 +135,16 @@ class AudioInterface
                 _callback(Failure(new Error(InternalError, 'Failed to open port. ${error.message}')));
             }
         });
+    }
+
+    public function closePort():Void
+    {
+        if (!isOpen) return;
+        if (processor != null) {
+            processor.disconnect();
+            processor = null;
+        }
+        isOpen = false;
     }
 
     public function setCallback(_audioCallback:AudioCallback):Void
