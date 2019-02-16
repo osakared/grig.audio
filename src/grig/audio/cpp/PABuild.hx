@@ -55,44 +55,90 @@ class PABuild
         }
     }
 
-    // private static function addALSAFlags(files:Xml, target:Xml)
-    // {
-    //     var defineXml = Xml.createElement('compilerflag');
-    //     defineXml.set('value', '-D__LINUX_ALSA__');
+    private static function addALSAFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_ALSA');
 
-    //     var libALSA = Xml.createElement('lib');
-    //     libALSA.set('name', '-lasound');
+        var libALSA = Xml.createElement('lib');
+        libALSA.set('name', '-lasound');
 
-    //     for (flag in [defineXml]) {
-    //         flag.set('if', 'linux'); // What do I do about FreeBSD?
-    //         files.addChild(flag);
-    //     }
+        for (flag in [defineXml]) {
+            flag.set('if', 'linux'); // What do I do about FreeBSD?
+            flag.set('unless', 'disable_alsa');
+            files.addChild(flag);
+        }
 
-    //     for (flag in [libALSA]) {
-    //         flag.set('if', 'linux');
-    //         target.addChild(flag);
-    //     }
-    // }
+        for (flag in [libALSA]) {
+            flag.set('if', 'linux');
+            flag.set('unless', 'disable_alsa');
+            target.addChild(flag);
+        }
 
-    // // Dynamically linking and not statically building a la portaudio itself because lGPL
-    // private static function addJACKFlags(files:Xml, target:Xml)
-    // {
-    //     var defineXml = Xml.createElement('compilerflag');
-    //     defineXml.set('value', '-D__UNIX_JACK__');
+        var fileNames = ['pa_linux_alsa.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/alsa/' + file);
+            fileXml.set('if', 'linux');
+            fileXml.set('unless', 'disable_alsa');
+            files.addChild(fileXml);
+        }
+    }
 
-    //     var libJACK = Xml.createElement('lib');
-    //     libJACK.set('name', '-ljack');
+    private static function addOSSFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_OSS');
 
-    //     for (flag in [defineXml]) {
-    //         flag.set('if', 'enable_jack');
-    //         files.addChild(flag);
-    //     }
+        var libALSA = Xml.createElement('lib');
+        libALSA.set('name', '-lossaudio');
 
-    //     for (flag in [libJACK]) {
-    //         flag.set('if', 'enable_jack');
-    //         target.addChild(flag);
-    //     }
-    // }
+        for (flag in [defineXml]) {
+            flag.set('if', 'enable_oss'); // What do I do about FreeBSD?
+            files.addChild(flag);
+        }
+
+        for (flag in [libALSA]) {
+            flag.set('if', 'enable_oss');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_unix_oss.c', 'recplay.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/oss/' + file);
+            fileXml.set('if', 'enable_oss');
+            files.addChild(fileXml);
+        }
+    }
+
+    // Dynamically linking and not statically building a la portaudio itself because lGPL
+    private static function addJACKFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_JACK');
+
+        var libJACK = Xml.createElement('lib');
+        libJACK.set('name', '-ljack');
+
+        for (flag in [defineXml]) {
+            flag.set('if', 'enable_jack');
+            files.addChild(flag);
+        }
+
+        for (flag in [libJACK]) {
+            flag.set('if', 'enable_jack');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_jack.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/jack/' + file);
+            fileXml.set('if', 'enable_jack');
+            files.addChild(fileXml);
+        }
+    }
 
     // private static function addWinMMFlags(files:Xml, target:Xml)
     // {
@@ -113,7 +159,7 @@ class PABuild
     //     }
     // }
 
-    private static function addOSSpecific(files:Xml):Void
+    private static function addOSSpecific(libPath:String, files:Xml):Void
     {
         var unixFiles = ['pa_unix_hostapis.c', 'pa_unix_util.c'];
         for (file in unixFiles) {
@@ -133,6 +179,11 @@ class PABuild
             fileXml.set('if', 'windows');
             files.addChild(fileXml);
         }
+
+        var includePath = Xml.createElement('compilerflag');
+        includePath.set('value', '-I$libPath/src/os/unix/');
+        includePath.set('if', 'linux || macos || ios');
+        files.addChild(includePath);
     }
 
     macro public static function xml():Array<Field>
@@ -203,10 +254,11 @@ class PABuild
         _defaultTarget.addChild(_outdir);
         _topElement.addChild(_defaultTarget);
 
-        addOSSpecific(_files);
+        addOSSpecific(_lib_path, _files);
         addCoreFlags(_files, _haxeTarget);
-        // addALSAFlags(_files, _haxeTarget);
-        // addJACKFlags(_files, _haxeTarget);
+        addALSAFlags(_files, _haxeTarget);
+        addJACKFlags(_files, _haxeTarget);
+        addOSSFlags(_files, _haxeTarget);
         // addWinMMFlags(_files, _haxeTarget);
 
         var filesString = _files.toString();
