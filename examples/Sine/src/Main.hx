@@ -75,6 +75,7 @@ class Main
         audioInterface.openPort(options).handle(function(audioOutcome) {
             switch audioOutcome {
                 case Success(_):
+                    trace(audioInterface.isOpen);
                     trace('Playing sine wave combined with input (if available)...');
                     mainLoop(audioInterface);
                 case Failure(error):
