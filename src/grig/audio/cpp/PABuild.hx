@@ -2,6 +2,7 @@ package grig.audio.cpp;
   
 import haxe.io.Path;
 import haxe.macro.Expr;
+import haxe.macro.Compiler;
 import haxe.macro.Context;
 
 using haxe.macro.PositionTools;
@@ -260,6 +261,52 @@ class PABuild
         }
     }
 
+    private static function addASIOFlags(sourcePath:String, files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_ASIO');
+
+        var ole32 = Xml.createElement('lib');
+        ole32.set('name', 'ole32.lib');
+
+        var uuid = Xml.createElement('lib');
+        uuid.set('name', 'uuid.lib');
+
+        for (flag in [defineXml]) {
+            flag.set('if', 'enable_asio');
+            files.addChild(flag);
+        }
+
+        for (flag in [ole32, uuid]) {
+            flag.set('if', 'enable_asio');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_asio.cpp', 'iasiothiscallresolver.cpp'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/asio/' + file);
+            fileXml.set('if', 'enable_asio');
+            files.addChild(fileXml);
+        }
+
+        var asioFileNames = ['common/asio.cpp', 'host/pc/asiolist.cpp', 'host/asiodrivers.cpp'];
+        for (file in asioFileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', '$${asio_path}/$file');
+            fileXml.set('if', 'enable_asio');
+            files.addChild(fileXml);
+        }
+
+        var includePaths = ['common', 'host', 'host/pc'];
+        for (includePath in includePaths) {
+            var includePathXml = Xml.createElement('compilerflag');
+            includePathXml.set('value', '-I$${asio_path}/$includePath');
+            includePathXml.set('if', 'enable_asio');
+            files.addChild(includePathXml);
+        }
+    }
+
     private static function addOSSpecific(libPath:String, files:Xml):Void
     {
         var unixFiles = ['pa_unix_hostapis.c', 'pa_unix_util.c'];
@@ -369,6 +416,7 @@ class PABuild
         addWinDSFlags(_files, _haxeTarget);
         addWASAPIFlags(_files, _haxeTarget);
         addWDKMSFlags(_files, _haxeTarget);
+        addASIOFlags(_source_path, _files, _haxeTarget);
 
         var filesString = _files.toString();
         var haxeTargetString = _haxeTarget.toString();

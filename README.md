@@ -6,4 +6,10 @@
 
 See the [haxe grig documentation](https://haxe-grig.gitlab.io/grig/)
 
-Audio primitives for haxe grig.
+Audio I/O and Audio Primitives for haxe.
+
+For c++ target, enable asio by specifying `enable_asio` AND giving the directory with `asio_path`:
+
+```
+haxe build.hxml -D enable_asio -D asio_path=C:/Users/username/Downloads/asio -cpp bin/Sine
+```
