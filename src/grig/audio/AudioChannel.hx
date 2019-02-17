@@ -69,7 +69,7 @@ abstract AudioChannel(AudioChannelData)
             length = minLength - sourceStart;
         }
         #if cpp
-        Vector.blit(this, sourceStart, other, sourceStart, length);
+        Vector.blit(this, sourceStart, cast other, sourceStart, length);
         #else
         var lengthToCopy = this.length - sourceStart;
         for (i in sourceStart...lengthToCopy) {
