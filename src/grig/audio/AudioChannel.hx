@@ -54,38 +54,46 @@ abstract AudioChannel(AudioChannelData)
         }
     }
 
-    // // TODO should have an otherStart parameter and honor it
-    // /**
-    //     Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
-    //     Values in other are replaced with values from calling `AudioChannel`.
-    // **/
-    // public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
-    // {
-    //     // Kinda violating DRY here
-    //     var minLength = this.length > other.length ? other.length : this.length;
-    //     if (sourceStart < 0) sourceStart = 0;
-    //     else if (sourceStart > minLength) sourceStart = minLength;
-    //     if (length == null || sourceStart + length > minLength) {
-    //         length = minLength - sourceStart;
-    //     }
-    //     Vector.blit(this, sourceStart, other, sourceStart, length);
-    // }
+    // TODO should have an otherStart parameter and honor it
+    /**
+        Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
+        Values in other are replaced with values from calling `AudioChannel`.
+    **/
+    public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
+    {
+        // Kinda violating DRY here
+        var minLength = this.length > other.length ? other.length : this.length;
+        if (sourceStart < 0) sourceStart = 0;
+        else if (sourceStart > minLength) sourceStart = minLength;
+        if (length == null || sourceStart + length > minLength) {
+            length = minLength - sourceStart;
+        }
+        #if cpp
+        Vector.blit(this, sourceStart, other, sourceStart, length);
+        #else
+        var lengthToCopy = this.length - sourceStart;
+        for (i in sourceStart...lengthToCopy) {
+            other[i] += this[i];
+        }
+        #end
+    }
 
-    // /** Multiply all values in the signal by gain **/
-    // public function applyGain(gain:AudioSample)
-    // {
-    //     for (i in 0...samples.length) {
-    //         samples[i] = samples[i] * gain;
-    //     }
-    // }
+    /** Multiply all values in the signal by gain **/
+    public function applyGain(gain:Float)
+    {
+        // This is ripe for optimization...
+        for (i in 0...this.length) {
+            this[i] *= gain;
+        }
+    }
 
-    // /** Create a new `AudioChannel` with the same parameters and data (deep copy) **/
-    // public function copy():AudioChannel
-    // {
-    //     var newChannel = new AudioChannel(samples.length, sampleRate);
-    //     copyInto(newChannel);
-    //     return newChannel;
-    // }
+    /** Create a new `AudioChannel` with the same parameters and data (deep copy) **/
+    public function copy():AudioChannel
+    {
+        var newChannel = new AudioChannel(new AudioChannelData(this.length));
+        copyInto(newChannel);
+        return newChannel;
+    }
 
     /** Set all values in the signal to `value` **/
     public function setAll(value:Float)
