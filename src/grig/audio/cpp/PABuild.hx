@@ -90,15 +90,15 @@ class PABuild
         var defineXml = Xml.createElement('compilerflag');
         defineXml.set('value', '-DPA_USE_OSS');
 
-        var libALSA = Xml.createElement('lib');
-        libALSA.set('name', '-lossaudio');
+        var libOSS = Xml.createElement('lib');
+        libOSS.set('name', '-lossaudio');
 
         for (flag in [defineXml]) {
             flag.set('if', 'enable_oss'); // What do I do about FreeBSD?
             files.addChild(flag);
         }
 
-        for (flag in [libALSA]) {
+        for (flag in [libOSS]) {
             flag.set('if', 'enable_oss');
             target.addChild(flag);
         }
@@ -140,24 +140,32 @@ class PABuild
         }
     }
 
-    // private static function addWinMMFlags(files:Xml, target:Xml)
-    // {
-    //     var defineXml = Xml.createElement('compilerflag');
-    //     defineXml.set('value', '-D__WINDOWS_MM__');
+    private static function addWinMMFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_WMME');
 
-    //     var libJACK = Xml.createElement('lib');
-    //     libJACK.set('name', 'winmm.lib');
+        var libMM = Xml.createElement('lib');
+        libMM.set('name', 'winmm.lib');
 
-    //     for (flag in [defineXml]) {
-    //         flag.set('if', 'windows');
-    //         files.addChild(flag);
-    //     }
+        for (flag in [defineXml]) {
+            flag.set('if', 'windows');
+            files.addChild(flag);
+        }
 
-    //     for (flag in [libJACK]) {
-    //         flag.set('if', 'windows');
-    //         target.addChild(flag);
-    //     }
-    // }
+        for (flag in [libMM]) {
+            flag.set('if', 'windows');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_win_wmme.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/wmme/' + file);
+            fileXml.set('if', 'windows');
+            files.addChild(fileXml);
+        }
+    }
 
     private static function addOSSpecific(libPath:String, files:Xml):Void
     {
@@ -259,7 +267,7 @@ class PABuild
         addALSAFlags(_files, _haxeTarget);
         addJACKFlags(_files, _haxeTarget);
         addOSSFlags(_files, _haxeTarget);
-        // addWinMMFlags(_files, _haxeTarget);
+        addWinMMFlags(_files, _haxeTarget);
 
         var filesString = _files.toString();
         var haxeTargetString = _haxeTarget.toString();

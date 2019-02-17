@@ -74,8 +74,12 @@ extern class PaDeviceInfo
     public var defaultSampleRate:cpp.Float64;
 }
 
-typedef PACallback = cpp.Callable<(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCount:cpp.SizeT,
-                                   timeInfo:PaStreamCallbackTimeInfo, statusFlags:cpp.SizeT, userData:cpp.RawPointer<cpp.Void>)->Int>;
+// We need exactly this and not an approximation
+@:native('unsigned long')
+extern class ULong {}
+
+typedef PACallback = cpp.Callable<(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCount:ULong,
+                                   timeInfo:PaStreamCallbackTimeInfo, statusFlags:ULong, userData:cpp.RawPointer<cpp.Void>)->Int>;
 
 extern class PortAudio
 {
@@ -139,9 +143,10 @@ class PAAudioInterface
     private static var outputOverflowFlag:Int = untyped __cpp__('paOutputOverflow');
     private static var primingOutputFlag:Int = untyped __cpp__('paPrimingOutput');
 
-    private static function handleAudioEvent(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCount:cpp.SizeT,
-                                             timeInfo:PaStreamCallbackTimeInfo, statusFlags:cpp.SizeT, userData:cpp.RawPointer<cpp.Void>):Int
+    private static function handleAudioEvent(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCountLong:ULong,
+                                             timeInfo:PaStreamCallbackTimeInfo, statusFlagsLong:ULong, userData:cpp.RawPointer<cpp.Void>):Int
     {
+        var frameCount:cpp.UInt64 = untyped __cpp__('{0}', frameCountLong);
         var interfaceIndex:cpp.UInt64 = untyped __cpp__('(unsigned long)userData');
         var audioInterface = audioInterfaces[interfaceIndex];
         if (audioInterface.audioCallback == null) return 0;
@@ -173,6 +178,7 @@ class PAAudioInterface
         var outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
 
         var streamInfo = new grig.audio.AudioStreamInfo();
+        var statusFlags:cpp.UInt64 = untyped __cpp__('{0}', statusFlagsLong);
         streamInfo.inputUnderflow = statusFlags & inputUnderflowFlag != 0;
         streamInfo.inputOverflow = statusFlags & inputOverflowFlag != 0;
         streamInfo.outputUnderflow = statusFlags & outputUnderflowFlag != 0;
