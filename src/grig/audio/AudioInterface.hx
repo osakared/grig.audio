@@ -12,7 +12,7 @@ typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
 
 extern class AudioInterface
 {
-    public var isOpen(default, null):Bool = false;
+    public var isOpen(default, null):Bool;
 
     public function new(api:grig.audio.Api = grig.audio.Api.Undefined);
     public static function getApis():Array<grig.audio.Api>;
