@@ -167,6 +167,99 @@ class PABuild
         }
     }
 
+    private static function addWinDSFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_DS');
+
+        var libDS = Xml.createElement('lib');
+        libDS.set('name', 'dsound.lib');
+
+        for (flag in [defineXml]) {
+            flag.set('if', 'windows');
+            files.addChild(flag);
+        }
+
+        for (flag in [libDS]) {
+            flag.set('if', 'windows');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_win_ds.c', 'pa_win_ds_dynlink.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/dsound/' + file);
+            fileXml.set('if', 'windows');
+            files.addChild(fileXml);
+        }
+    }
+
+    private static function addWASAPIFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_WASAPI');
+
+        var ole32 = Xml.createElement('lib');
+        ole32.set('name', 'ole32.lib');
+
+        var uuid = Xml.createElement('lib');
+        uuid.set('name', 'uuid.lib');
+
+        for (flag in [defineXml]) {
+            flag.set('if', 'windows');
+            files.addChild(flag);
+        }
+
+        for (flag in [ole32, uuid]) {
+            flag.set('if', 'windows');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_win_wasapi.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/wasapi/' + file);
+            fileXml.set('if', 'windows');
+            files.addChild(fileXml);
+        }
+    }
+
+    private static function addWDKMSFlags(files:Xml, target:Xml)
+    {
+        var defineXml = Xml.createElement('compilerflag');
+        defineXml.set('value', '-DPA_USE_WDMKS');
+
+        var ole32 = Xml.createElement('lib');
+        ole32.set('name', 'ole32.lib');
+
+        var uuid = Xml.createElement('lib');
+        uuid.set('name', 'uuid.lib');
+
+        var setupapi = Xml.createElement('lib');
+        setupapi.set('name', 'setupapi.lib');
+
+        var advapi32 = Xml.createElement('lib');
+        advapi32.set('name', 'advapi32.lib');
+
+        for (flag in [defineXml]) {
+            flag.set('if', 'windows');
+            files.addChild(flag);
+        }
+
+        for (flag in [ole32, uuid, setupapi, advapi32]) {
+            flag.set('if', 'windows');
+            target.addChild(flag);
+        }
+
+        var fileNames = ['pa_win_wdmks.c'];
+        for (file in fileNames) {
+            var fileXml = Xml.createElement('file');
+            fileXml.set('name', 'src/hostapi/wdmks/' + file);
+            fileXml.set('if', 'windows');
+            files.addChild(fileXml);
+        }
+    }
+
     private static function addOSSpecific(libPath:String, files:Xml):Void
     {
         var unixFiles = ['pa_unix_hostapis.c', 'pa_unix_util.c'];
@@ -191,6 +284,11 @@ class PABuild
         var includePath = Xml.createElement('compilerflag');
         includePath.set('value', '-I$libPath/src/os/unix/');
         includePath.set('if', 'linux || macos || ios');
+        files.addChild(includePath);
+
+        var includePath = Xml.createElement('compilerflag');
+        includePath.set('value', '-I$libPath/src/os/win/');
+        includePath.set('if', 'windows');
         files.addChild(includePath);
     }
 
@@ -268,6 +366,9 @@ class PABuild
         addJACKFlags(_files, _haxeTarget);
         addOSSFlags(_files, _haxeTarget);
         addWinMMFlags(_files, _haxeTarget);
+        addWinDSFlags(_files, _haxeTarget);
+        addWASAPIFlags(_files, _haxeTarget);
+        addWDKMSFlags(_files, _haxeTarget);
 
         var filesString = _files.toString();
         var haxeTargetString = _haxeTarget.toString();
