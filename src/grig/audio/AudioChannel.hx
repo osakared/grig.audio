@@ -73,7 +73,7 @@ abstract AudioChannel(AudioChannelData)
         #else
         var lengthToCopy = this.length - sourceStart;
         for (i in sourceStart...lengthToCopy) {
-            other[i] += this[i];
+            other[i] = this[i];
         }
         #end
     }
