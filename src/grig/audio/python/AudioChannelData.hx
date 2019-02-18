@@ -1,4 +1,4 @@
-package grig.audio.python;
+package grig.audio.python; #if python
 
 import grig.audio.python.numpy.Ndarray;
 
@@ -28,3 +28,5 @@ abstract AudioChannelData(Ndarray)
         return python.Syntax.code('len({0})', this);
     }
 }
+
+#end

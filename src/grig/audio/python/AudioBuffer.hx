@@ -1,4 +1,4 @@
-package grig.audio.python;
+package grig.audio.python; #if python
 
 class AudioBuffer
 {
@@ -12,3 +12,5 @@ class AudioBuffer
         sampleRate = _sampleRate;
     }
 }
+
+#end
