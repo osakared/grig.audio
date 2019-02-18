@@ -214,6 +214,9 @@ class AudioInterface
     public function closePort():Void
     {
         if (!isOpen) return;
+        stream.stop_stream();
+        stream = null;
+        isOpen = false;
     }
 
     public function setCallback(_audioCallback:AudioCallback):Void
