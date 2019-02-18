@@ -8,13 +8,15 @@ typedef AudioInterface = NativeChannelAudioInterface;
 typedef AudioInterface = grig.audio.js.webaudio.AudioInterface;
 #elseif cpp
 typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
+#elseif python
+typedef AudioInterface = grig.audio.python.AudioInterface;
 #else
 
 extern class AudioInterface
 {
     public var isOpen(default, null):Bool;
 
-    public function new(api:grig.audio.Api = grig.audio.Api.Undefined);
+    public function new(api:grig.audio.Api = grig.audio.Api.Unspecified);
     public static function getApis():Array<grig.audio.Api>;
     public function getPorts():Array<PortInfo>;
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>;

@@ -223,34 +223,6 @@ class PAAudioInterface
         audioInterfaces.push(this);
     }
 
-    private static var nameApiMapping = [
-        'ALSA'                      => grig.audio.Api.Alsa,
-        'ASIO'                      => grig.audio.Api.WindowsASIO,
-        'Core Audio'                => grig.audio.Api.MacOSCore,
-        'Windows DirectSound'       => grig.audio.Api.WindowsDS,
-        'JACK Audio Connection Kit' => grig.audio.Api.Jack,
-        'OSS'                       => grig.audio.Api.Oss,
-        'Windows WASAPI'            => grig.audio.Api.WindowsWASAPI,
-        'Windows WDM-KS'            => grig.audio.Api.WindowsWDMKS,
-        'MME'                       => grig.audio.Api.WindowsMME,
-        'Unspecified'               => grig.audio.Api.Unspecified,
-    ];
-
-    // This probably needs to be moved to some common place where all PA implementations can access
-    private static function apiFromName(name:String):Api
-    {
-        if (nameApiMapping.exists(name)) return nameApiMapping[name];
-        throw new Error(InternalError, 'Unknown api: $name');
-    }
-
-    private static function nameFromApi(api:Api):String
-    {
-        for (name in nameApiMapping.keys()) {
-            if (nameApiMapping[name] == api) return name;
-        }
-        throw new Error(InternalError, 'Unknown api: $api');
-    }
-
     private static function checkError(ret:Int):Void
     {
         if (ret != 0) {
@@ -292,7 +264,7 @@ class PAAudioInterface
         var apis = new Array<grig.audio.Api>();
         var apiInfos = getApiInfos();
         for (apiInfo in apiInfos) {
-            apis.push(apiFromName(apiInfo.name));
+            apis.push(grig.audio.PortAudioHelper.apiFromName(apiInfo.name));
         }
         return apis;
     }
@@ -323,6 +295,7 @@ class PAAudioInterface
 
         // This is kind of brain dead because I'd rather not assume just because a given sampleRate
         // is higher than the default but not supported, that yet higher sampleRates aren't (for example)
+        // This also doesn't know what's native vs. what's just being resampled by the driver or sth
         for (sampleRate in grig.audio.SampleRate.commonSampleRates) {
             var ret = PortAudio.isFormatSupported(inputParameters, outputParameters, sampleRate);
             if (ret == 0) portInfo.sampleRates.push(sampleRate);
@@ -335,7 +308,7 @@ class PAAudioInterface
     {
         var portInfos = new Array<PortInfo>();
         var apiInfos = getApiInfos();
-        var apiName = nameFromApi(api);
+        var apiName = grig.audio.PortAudioHelper.nameFromApi(api);
         for (apiInfo in apiInfos) {
             if (apiInfo.name == apiName || api == grig.audio.Api.Unspecified) {
                 for (i in 0...apiInfo.deviceCount) {

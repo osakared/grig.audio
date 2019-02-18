@@ -2,6 +2,8 @@ package grig.audio;
 
 #if (js && !nodejs && !heaps)
 typedef AudioBuffer = grig.audio.js.webaudio.AudioBuffer;
+#elseif python
+typedef AudioBuffer = grig.audio.python.AudioBuffer;
 #else
 
 class AudioBuffer

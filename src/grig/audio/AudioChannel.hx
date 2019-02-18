@@ -134,18 +134,4 @@ abstract AudioChannel(AudioChannelData)
     {
         return sumOfSquares() < sumOfSquaresThreshold;
     }
-
-    // // The lack of @arrayAccess on non-abstract is maddening
-    // /** Get the value of the sample pointed at by `index` **/
-    // public inline function get(index:Int):Float
-    // {
-    //     return samples[index];
-    // }
-
-    // /** Set the value at `index` to `value` **/
-    // public inline function set(index:Int, value:Float):Float
-    // {
-    //     samples[index] = value;
-    //     return value;
-    // }
 }
