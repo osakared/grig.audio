@@ -11,7 +11,6 @@ os:
 
 install:
   - npm install -g lix
-  - luarocks install luautf8
 
 script:
   - lix download
@@ -22,4 +21,4 @@ script:
   - haxelib run travix cpp
   - #haxelib run travix cs
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix php    ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix lua      ; fi
+  - #if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix lua      ; fi
