@@ -11,6 +11,7 @@ os:
 
 install:
   - npm install -g lix
+  - luarocks install luautf8
 
 script:
   - lix download
