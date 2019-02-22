@@ -8,8 +8,24 @@ See the [haxe grig documentation](https://haxe-grig.gitlab.io/grig/)
 
 Audio I/O and Audio Primitives for haxe.
 
-For c++ target, enable asio by specifying `enable_asio` AND giving the directory with `asio_path`:
+## Targets
 
-```
+### C++
+
+enable asio by specifying `enable_asio` AND giving the directory with `asio_path`:
+
+```bash
 haxe build.hxml -D enable_asio -D asio_path=C:/Users/username/Downloads/asio -cpp bin/Sine
 ```
+
+enable jack with `enable_jack`
+
+### js
+
+Audio i/o on nodejs requires `naudiodon`:
+
+```bash
+npm install naudiodon
+```
+
+This is not required for webaudio-based audio in the browser. Just for standalone/nodejs applications talking to the soundcard.
