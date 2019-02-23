@@ -66,23 +66,7 @@ extern class AudioIO extends Duplex<AudioIO>
 {
     public function new(options:AudioIOOptions);
     public function start():Void;
-    public function quit(callback:()->Void):Void;
-}
-
-class AudioTransformStream extends js.node.stream.Transform<AudioTransformStream>
-{
-    public function new()
-    {
-        super();
-    }
-
-    override private function _transform(chunk:Buffer, encoding:String, callback:js.Error->EitherType<String,Buffer>->Void):Void
-    {
-        trace('x');
-        trace(chunk.length);
-        this.push(chunk);
-        callback(null, null);
-    }
+    public function quit():Void;
 }
 
 class AudioInterface
@@ -91,7 +75,8 @@ class AudioInterface
     public var audioCallback(default, null):AudioCallback;
     private var api:grig.audio.Api;
     private static var maxInt32:Int = 2147483647;
-    private var audioIO:AudioIO;
+    private var audioInput:AudioIO;
+    private var audioOutput:AudioIO;
 
     private var inputNumChannels:Int;
     private var outputNumChannels:Int;
@@ -100,6 +85,7 @@ class AudioInterface
     private var outputPort:Null<Int>;
 
     private var inputBuffer:AudioBuffer;
+    private var outputBuffer:AudioBuffer;
 
     public function new(_api:grig.audio.Api = grig.audio.Api.Unspecified)
     {
@@ -161,25 +147,36 @@ class AudioInterface
     private function respondToInput(chunk:Buffer)
     {
         var arrayLength = Std.int(chunk.length / 4);
-        var channelLength = Std.int(arrayLength / inputNumChannels);
-        if (inputBuffer == null) {
-            var inputChannels = new Array<AudioChannel>();
-            for (i in 0...inputNumChannels) {
-                inputChannels.push(new AudioChannel(new Float32Array(channelLength)));
+        if (inputNumChannels > 0) {
+            var channelLength = Std.int(arrayLength / inputNumChannels);
+            if (inputBuffer == null) {
+                var inputChannels = new Array<AudioChannel>();
+                for (i in 0...inputNumChannels) {
+                    inputChannels.push(new AudioChannel(new Float32Array(channelLength)));
+                }
+                inputBuffer = new AudioBuffer(inputChannels, sampleRate);
             }
-            inputBuffer = new AudioBuffer(inputChannels, sampleRate);
-        }
-        else {
-            for (i in 0...inputNumChannels) {
-                if (inputBuffer.channels[i].length != channelLength) {
-                    inputBuffer.channels[i] = new AudioChannel(new Float32Array(channelLength));
+            else {
+                for (i in 0...inputNumChannels) {
+                    if (inputBuffer.channels[i].length != channelLength) {
+                        inputBuffer.channels[i] = new AudioChannel(new Float32Array(channelLength));
+                    }
                 }
             }
+            for (i in 0...arrayLength) {
+                inputBuffer.channels[i % inputNumChannels][Std.int(i / inputNumChannels)] = chunk.readInt32LE(i * 4) / maxInt32;
+            }
         }
-        for (i in 0...arrayLength) {
-            inputBuffer.channels[i % inputNumChannels][Std.int(i / inputNumChannels)] = chunk.readInt32LE(i * 4) / maxInt32;
+        else if (inputBuffer == null) {
+            inputBuffer = new AudioBuffer(new Array<AudioChannel>(), sampleRate);
         }
+
+        // if (outputNumChannels > 0) {
+        //     var channelLength = arrayLength > 0 ? arrayLength : 
+        // }
         trace(arrayLength);
+
+        audioOutput.write(chunk);
     }
 
     private function processOptions(options:AudioInterfaceOptions)
@@ -202,34 +199,36 @@ class AudioInterface
                 processOptions(options);
                 var audioIOOptions:AudioIOOptions = {};
                 if (inputPort != null) {
-                    audioIOOptions.inOptions = {
-                        channelCount: inputNumChannels,
+                    audioInput = new AudioIO({inOptions: {
+                        channelCount: 2,//inputNumChannels,
                         sampleFormat: PortAudio.SampleFormat32Bit,
                         sampleRate: Std.int(sampleRate),
-                        deviceId: inputPort
-                    };
+                        deviceId: 0//inputPort
+                    }});
                 }
                 if (outputPort != null) {
-                    audioIOOptions.outOptions = {
-                        channelCount: outputNumChannels,
+                    audioOutput = new AudioIO({outOptions: {
+                        channelCount: 2,//outputNumChannels,
                         sampleFormat: PortAudio.SampleFormat32Bit,
                         sampleRate: Std.int(sampleRate),
-                        deviceId: outputPort
-                    };
+                        deviceId: 0//outputPort
+                    }});
                 }
-                audioIO = new AudioIO(audioIOOptions);
 
-                var transform = new AudioTransformStream();
+                // var transform = new AudioTransformStream();
+                // audioInput.pipe(transform).pipe(audioOutput);
+                audioInput.once('data', function() { audioOutput.start(); });
+                audioInput.start();
                 // audioIO.pipe(transform).pipe(audioIO);
-                transform.pipe(audioIO).pipe(transform);
+                // transform.pipe(audioIO).pipe(transform);
                 // audioIO.pipe(audioIO);
 
                 // var emptyChunk = new Buffer(8192);
                 // audioIO.write(emptyChunk);
                 // audioIO.write(emptyChunk);
 
-                // audioIO.on('data', respondToInput);
-                audioIO.start();
+                audioInput.on('data', respondToInput);
+                // audioIO.start();
 
                 isOpen = true;
                 _callback(Success(this));
@@ -243,11 +242,11 @@ class AudioInterface
     public function closePort():Void
     {
         if (!isOpen) return;
-        audioIO.quit(function () {
-            isOpen = false;
-            inputBuffer = null;
-            audioIO = null;
-        });
+        audioInput.quit();
+        audioOutput.quit();
+        isOpen = false;
+        inputBuffer = null;
+        audioInput = audioOutput = null;
     }
 
     public function setCallback(_audioCallback:AudioCallback):Void
