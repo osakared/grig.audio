@@ -227,7 +227,7 @@ class AudioInterface
                 // audioIO.write(emptyChunk);
                 // audioIO.write(emptyChunk);
 
-                audioInput.on('data', respondToInput);
+                // audioInput.on('data', respondToInput);
                 // audioIO.start();
 
                 isOpen = true;
