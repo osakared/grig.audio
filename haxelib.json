@@ -1,16 +1,20 @@
 {
   "name": "grig.audio",
+  "url" : "https://haxe-grig.gitlab.io/grig/",
   "license": "MIT",
   "tags": [
     "audio",
     "samples",
     "effects"
   ],
+  "description": "Cross-target abstractions for supporting audio ports (C++, python, js/webmidi, python) and working with buffers of audio data.",
   "classPath": "src",
   "contributors": [
     "thomasjwebb"
   ],
-  "releasenote": "initial release",
-  "version": "0.0.0",
-  "dependencies": {}
+  "releasenote": "Initial release",
+  "version": "0.0.1",
+  "dependencies": {
+    "tink_core": "1.20.0"
+  }
 }
