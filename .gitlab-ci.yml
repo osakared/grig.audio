@@ -4,9 +4,6 @@ before_script:
 
 test:
   script:
-   - haxelib install hxcpp
-   - haxelib install hxjava
-   - haxelib install hxcs
    - lix download
    - haxe tests.hxml --interp
    - haxe tests.hxml -python bin/tests.py           && python3 bin/tests.py
@@ -19,5 +16,8 @@ test:
 
 trigger_build:
   stage: deploy
+  only:
+    refs:
+      - master
   script:
-    - "curl -X POST -F \"token=$CI_JOB_TOKEN\" -F ref=master https://gitlab.com/api/v4/projects/6741415/trigger/pipeline"
+    - "curl -X POST -d {} https://api.netlify.com/build_hooks/$NETLIFY_TOKEN"
