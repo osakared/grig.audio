@@ -1,6 +1,4 @@
 image: osakared/haxe-ci
-  
-before_script:
 
 test:
   script:
@@ -21,3 +19,10 @@ trigger_build:
       - master
   script:
     - "curl -X POST -d {} https://api.netlify.com/build_hooks/$NETLIFY_TOKEN"
+
+release:
+  stage: deploy
+  only:
+    - tags
+  script:
+    - bash ./release_haxelib.sh $HAXELIB_PWD
