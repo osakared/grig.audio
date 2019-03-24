@@ -389,13 +389,13 @@ class PABuild
         var _libXml = Xml.createElement('lib');
         _libXml.set('name', Path.normalize(Path.join(['build', 'libportaudio$${LIBEXT}'])));
         var _targetDependency = Xml.createElement('target');
-        _targetDependency.set('id', 'default');
+        _targetDependency.set('id', 'portaudio_link');
         _haxeTarget.addChild(_libXml);
         _haxeTarget.addChild(_targetDependency);
         _topElement.addChild(_haxeTarget);
 
         var _defaultTarget = Xml.createElement('target');
-        _defaultTarget.set('id', 'default');
+        _defaultTarget.set('id', 'portaudio_link');
         _defaultTarget.set('tool', 'linker');
         _defaultTarget.set('toolid', 'static_link');
         _defaultTarget.set('output', 'libportaudio');
