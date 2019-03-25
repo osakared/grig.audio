@@ -3,7 +3,7 @@ package grig.audio;
 import haxe.ds.Vector;
 
 #if (js && !nodejs && !heaps)
-typedef AudioChannelData = js.html.Float32Array;
+typedef AudioChannelData = js.lib.Float32Array;
 #elseif cpp
 typedef AudioChannelData = haxe.ds.Vector<cpp.Float32>;
 #else

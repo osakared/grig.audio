@@ -111,6 +111,7 @@ class AudioInterface
                     _callback(Failure(new Error(InternalError, 'Unsupported number of output channels: ${options.outputNumChannels}')));
                 }
                 requestAudioAccess(options).then(function(inputNode:Null<MediaStreamAudioSourceNode>) {
+                    audioContext.resume();
                     if (inputNode != null) {
                         if (options.inputNumChannels > inputNode.channelCount) {
                             _callback(Failure(new Error(InternalError, 'Unsupported number of input channels: ${options.inputNumChannels}')));

@@ -68,6 +68,7 @@ class AudioInterface
         // Gotta deinterleave because pyAudio only supports interleaved
         var kwargs = new Dict<String, Dynamic>();
         kwargs.set('dtype', grig.audio.python.numpy.Numpy.float32);
+        // TODO handle input being null,
         var inputDataInterleaved = grig.audio.python.numpy.Numpy.frombuffer(input, kwargs);
         var inputData:Ndarray = python.Syntax.code('[{0}[idx::{1}] for idx in range({1})]', inputDataInterleaved, outputNumChannels);
         // var inputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));

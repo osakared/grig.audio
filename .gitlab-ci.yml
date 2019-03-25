@@ -3,6 +3,8 @@ image: osakared/haxe-ci
 test:
   script:
    - lix download
+   - git submodule init
+   - git submodule update
    - haxe tests.hxml --interp
    - haxe tests.hxml -python bin/tests.py           && python3 bin/tests.py
    - haxe tests.hxml -lib hxnodejs -js bin/tests.js && node bin/tests.js
