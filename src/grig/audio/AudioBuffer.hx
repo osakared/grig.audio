@@ -17,6 +17,13 @@ class AudioBuffer
         channels = _channels;
         sampleRate = _sampleRate;
     }
+
+    public function clear():Void
+    {
+        for (channel in channels) {
+            channel.clear();
+        }
+    }
 }
 
 #end
