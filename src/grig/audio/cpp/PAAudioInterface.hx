@@ -143,6 +143,11 @@ class PAAudioInterface
     private static var outputOverflowFlag:Int = untyped __cpp__('paOutputOverflow');
     private static var primingOutputFlag:Int = untyped __cpp__('paPrimingOutput');
 
+    private var m = new sys.thread.Mutex();
+    private var outputBuffer:AudioBuffer;
+    private var inputBuffer:AudioBuffer;
+    private var streamInfo = new grig.audio.AudioStreamInfo();
+
     private static function handleAudioEvent(input:cpp.RawConstPointer<cpp.Void>, output:cpp.RawPointer<cpp.Void>, frameCountLong:ULong,
                                              timeInfo:PaStreamCallbackTimeInfo, statusFlagsLong:ULong, userData:cpp.RawPointer<cpp.Void>):Int
     {
@@ -150,46 +155,63 @@ class PAAudioInterface
         var interfaceIndex:cpp.UInt64 = untyped __cpp__('(unsigned long)userData');
         var audioInterface = audioInterfaces[interfaceIndex];
         if (audioInterface.audioCallback == null) return 0;
+        if (!audioInterface.m.tryAcquire()) return 0;
 
-        // God I hope I'm not creating too much overhead here
-        var inputChannels = new Array<AudioChannel>();
-        var inputConstFloat:cpp.RawConstPointer<cpp.RawPointer<cpp.Float32>> = untyped __cpp__('(const float**)input');
-        for (i in 0...audioInterface.inputNumChannels) {
-            var inputArray = cpp.NativeArray.create(0);
-            // I'm having to type out the raw c++ here just because some bug in haxe is preventing the global scoping right now
-            var inputConstPointer:cpp.ConstPointer<cpp.Float32> = untyped __cpp__('::cpp::Pointer_obj::fromRaw(inputConstFloat[{0}])', i); //cpp.ConstPointer.fromRaw(inputConstFloat);
-            inputArray.setUnmanagedData(inputConstPointer, frameCount);
-            var inputVector = Vector.fromData(inputArray);
-            inputChannels.push(new AudioChannel(inputVector));
+        if (audioInterface.inputBuffer == null) {
+            var inputChannels = new Array<AudioChannel>();
+            for (i in 0...audioInterface.inputNumChannels) {
+                inputChannels.push(new AudioChannel(new AudioChannelData(frameCount)));
+            }
+            audioInterface.inputBuffer = new AudioBuffer(inputChannels, audioInterface.sampleRate);
         }
-        var inputBuffer = new AudioBuffer(inputChannels, audioInterface.sampleRate);
+        // TODO use memcpy instead to make faster
+        untyped __cpp__('float **inputChannels = (float**)input');
+        for (c in 0...audioInterface.inputNumChannels) {
+            for (i in 0...frameCount) {
+                audioInterface.inputBuffer.channels[c][i] = untyped __cpp__('inputChannels[{0}][{1}]', c, i);
+            }
+        }
 
-        var outputChannels = new Array<AudioChannel>();
-        var outputFloat:cpp.RawPointer<cpp.RawPointer<cpp.Float32>> = untyped __cpp__('(float**)output');
+        if (audioInterface.outputBuffer == null) {
+            var outputChannels = new Array<AudioChannel>();
+            for (i in 0...audioInterface.outputNumChannels) {
+                outputChannels.push(new AudioChannel(new AudioChannelData(frameCount)));
+            }
+            audioInterface.outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
+        }
         for (i in 0...audioInterface.outputNumChannels) {
-            var outputArray = cpp.NativeArray.create(0);
-            var outputPointer:cpp.Pointer<cpp.Float32> = untyped __cpp__('::cpp::Pointer_obj::fromRaw(outputFloat[{0}])', i);
-            outputArray.setUnmanagedData(outputPointer, frameCount);
-            var outputVector = Vector.fromData(outputArray);
-            var outputChannel = new AudioChannel(outputVector);
-            outputChannel.clear(); // Why do I have to do this to avoid a buzzing sound?
-            outputChannels.push(outputChannel);
+            if (audioInterface.outputBuffer.channels[i].length != frameCount) {
+                audioInterface.outputBuffer.channels[i] = new AudioChannel(new AudioChannelData(frameCount));
+            }
+            else break; // Assuming they're all the same length
         }
-        var outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
+        audioInterface.outputBuffer.clear();
 
-        var streamInfo = new grig.audio.AudioStreamInfo();
         var statusFlags:cpp.UInt64 = untyped __cpp__('{0}', statusFlagsLong);
-        streamInfo.inputUnderflow = statusFlags & inputUnderflowFlag != 0;
-        streamInfo.inputOverflow = statusFlags & inputOverflowFlag != 0;
-        streamInfo.outputUnderflow = statusFlags & outputUnderflowFlag != 0;
-        streamInfo.outputOverflow = statusFlags & outputOverflowFlag != 0;
-        streamInfo.primingOutput = statusFlags & primingOutputFlag != 0;
-        streamInfo.inputTime = new AudioTime(timeInfo.inputBufferAdcTime);
-        streamInfo.outputTime = new AudioTime(timeInfo.outputBufferDacTime);
-        streamInfo.callbackTime = new AudioTime(timeInfo.currentTime);
+        audioInterface.streamInfo.inputUnderflow = statusFlags & inputUnderflowFlag != 0;
+        audioInterface.streamInfo.inputOverflow = statusFlags & inputOverflowFlag != 0;
+        audioInterface.streamInfo.outputUnderflow = statusFlags & outputUnderflowFlag != 0;
+        audioInterface.streamInfo.outputOverflow = statusFlags & outputOverflowFlag != 0;
+        audioInterface.streamInfo.primingOutput = statusFlags & primingOutputFlag != 0;
+        audioInterface.streamInfo.inputTime = new AudioTime(timeInfo.inputBufferAdcTime);
+        audioInterface.streamInfo.outputTime = new AudioTime(timeInfo.outputBufferDacTime);
+        audioInterface.streamInfo.callbackTime = new AudioTime(timeInfo.currentTime);
 
-        audioInterface.audioCallback(inputBuffer, outputBuffer, audioInterface.sampleRate, streamInfo);
+        audioInterface.audioCallback(audioInterface.inputBuffer, audioInterface.outputBuffer, audioInterface.sampleRate, audioInterface.streamInfo);
+
+        untyped __cpp__('float **outputChannels = (float**)output');
+        // TODO use memcpy instead to make faster
+        var channel;
+        var val;
+        for (c in 0...audioInterface.outputNumChannels) {
+            channel = audioInterface.outputBuffer.channels[c];
+            for (i in 0...frameCount) {
+                val = channel[i];
+                untyped __cpp__('outputChannels[{0}][{1}] = {2}', c, i, val);
+            }
+        }
         
+        audioInterface.m.release();
         return 0;
     }
 
