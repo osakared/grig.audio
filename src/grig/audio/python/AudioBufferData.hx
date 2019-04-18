@@ -27,6 +27,11 @@ abstract AudioBufferData(Ndarray)
     {
         return python.Syntax.code('len({0})', this);
     }
+
+    public function clear():Void
+    {
+        this.fill(0.0);
+    }
 }
 
 #end

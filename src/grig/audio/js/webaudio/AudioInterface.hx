@@ -11,9 +11,9 @@ import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
 
-typedef WorkletPorts = Array<Array<js.html.Float32Array>>;
+typedef WorkletPorts = Array<Array<js.lib.Float32Array>>;
 
-// class CallbackProcessor extends js.html.audio.AudioWorkletProcessor // Will this fail at runtime upon declaration or instantiation if worklet interface is missing?
+// class CallbackProcessor extends js.lib.audio.AudioWorkletProcessor // Will this fail at runtime upon declaration or instantiation if worklet interface is missing?
 // {
 //     private var audioInterface:AudioInterface;
 
@@ -83,9 +83,6 @@ class AudioInterface
 
     private function requestAudioAccess(options:AudioInterfaceOptions):js.Promise<Null<MediaStreamAudioSourceNode>>
     {
-        if (options.inputNumChannels == 0) {
-            return js.Promise.resolve(null);
-        }
         var promise:js.Promise<js.html.MediaStream> = js.Syntax.code('navigator.mediaDevices.getUserMedia({audio:true})');
         return promise.then(function(mediaStream:js.html.MediaStream) {
             return js.Promise.resolve(audioContext.createMediaStreamSource(mediaStream));

@@ -63,21 +63,37 @@ class AudioInterface
     private var inputLatency:Float;
     private var outputLatency:Float;
 
+    private var inputBuffer:AudioBuffer = null;
+    private var outputBuffer:AudioBuffer = null;
+
     private function callbackHandler(input:python.Bytes, frameCount:Int, timeInfo:Dict<String, Float>, statusFlags:Int):Tuple2<python.Bytearray, Int>
     {
-        // Gotta deinterleave because pyAudio only supports interleaved
-        var kwargs = new Dict<String, Dynamic>();
-        kwargs.set('dtype', grig.audio.python.numpy.Numpy.float32);
-        // TODO handle input being null,
-        var inputDataInterleaved = grig.audio.python.numpy.Numpy.frombuffer(input, kwargs);
-        var inputData:Ndarray = python.Syntax.code('[{0}[idx::{1}] for idx in range({1})]', inputDataInterleaved, outputNumChannels);
-        // var inputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
+        if (input != null) {
+            // Gotta deinterleave because pyAudio only supports interleaved
+            var kwargs = new Dict<String, Dynamic>();
+            kwargs.set('dtype', grig.audio.python.numpy.Numpy.float32);
+            var inputDataInterleaved = grig.audio.python.numpy.Numpy.frombuffer(input, kwargs);
+            var inputData:Ndarray = python.Syntax.code('[{0}[idx::{1}] for idx in range({1})]', inputDataInterleaved, outputNumChannels);
+            // var inputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
+            inputBuffer = new AudioBuffer(new AudioBufferData(inputData), sampleRate);
+        }
+        else if (inputBuffer == null) {
+            var inputData:Ndarray = new Ndarray(python.Syntax.code('[]'));
+            inputBuffer = new AudioBuffer(new AudioBufferData(inputData), sampleRate);
+        }
+        else {
+            inputBuffer.clear();
+        }
 
-        // Don't forget to switch to looking at numInputChannels whenever the problem with pyAudio only supporting one number to rule them all is fixed
-        var outputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
+        if (outputBuffer == null) {
+            // Don't forget to switch to looking at numInputChannels whenever the problem with pyAudio only supporting one number to rule them all is fixed
+            var outputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
+            outputBuffer = new AudioBuffer(new AudioBufferData(outputData), sampleRate);
+        }
+        else {
+            outputBuffer.clear();
+        }
 
-        var inputBuffer = new AudioBuffer(new AudioBufferData(inputData), sampleRate);
-        var outputBuffer = new AudioBuffer(new AudioBufferData(outputData), sampleRate);
         var streamInfo = new grig.audio.AudioStreamInfo();
         streamInfo.inputUnderflow = statusFlags & PyAudioGlobal.paInputUnderflow != 0;
         streamInfo.inputOverflow = statusFlags & PyAudioGlobal.paInputOverflow != 0;
