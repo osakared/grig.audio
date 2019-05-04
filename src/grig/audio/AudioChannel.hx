@@ -44,13 +44,12 @@ abstract AudioChannel(AudioChannelData)
         // Why doesn't haxe have max/min for ints?
         var minLength = this.length > other.length ? other.length : this.length;
         if (sourceStart < 0) sourceStart = 0;
-        else if (sourceStart > minLength) sourceStart = minLength;
-        if (length == null || sourceStart + length > minLength) {
-            length = minLength - sourceStart;
+        if (length == null || length > minLength) {
+            length = minLength;
         }
         // This is ripe for optimization.. but be careful about not breaking targets
-        for (i in sourceStart...(sourceStart + length)) {
-            other[i] = other[i] + this[i];
+        for (i in 0...length) {
+            other[i] = other[i] + this[sourceStart + i];
         }
     }
 
@@ -61,19 +60,16 @@ abstract AudioChannel(AudioChannelData)
     **/
     public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
     {
-        // Kinda violating DRY here
-        var minLength = this.length > other.length ? other.length : this.length;
+        var minLength = (this.length - sourceStart) > other.length ? other.length : (this.length - sourceStart);
         if (sourceStart < 0) sourceStart = 0;
-        else if (sourceStart > minLength) sourceStart = minLength;
-        if (length == null || sourceStart + length > minLength) {
-            length = minLength - sourceStart;
+        if (length == null || length > minLength) {
+            length = minLength;
         }
         #if cpp
-        Vector.blit(this, sourceStart, cast other, sourceStart, length);
+        Vector.blit(this, sourceStart, cast other, 0, length);
         #else
-        var lengthToCopy = this.length - sourceStart;
-        for (i in sourceStart...lengthToCopy) {
-            other[i] = this[i];
+        for (i in 0...length) {
+            other[i] = this[sourceStart + i];
         }
         #end
     }

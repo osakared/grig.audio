@@ -14,4 +14,4 @@ For c++ target, enable asio by specifying `enable_asio` AND giving the directory
 haxe build.hxml -D enable_asio -D asio_path=C:/Users/username/Downloads/asio -cpp bin/Sine
 ```
 
-For python target, pip packages `numpy` and `pyaudio` are needed.
+For python target, pip packages `numpy`, `scipy` and `pyaudio` are needed.

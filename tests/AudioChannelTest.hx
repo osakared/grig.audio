@@ -1,6 +1,8 @@
 package;
-  
+
+import grig.audio.AudioBuffer;
 import grig.audio.AudioChannel;
+import grig.audio.LinearInterpolator;
 import tink.unit.Assert.*;
 
 @:asserts
@@ -24,6 +26,19 @@ class AudioChannelTest {
         }
         channel1.addInto(channel2, 0, length);
         return assert(channel2.isSilent() && !channel1.isSilent());
+    }
+
+    public function testResample()
+    {
+        var length = 10;
+        var buffer = AudioBuffer.create(1, length, 44100.0);
+        for (i in 0...buffer.length) {
+            buffer.channels[0][i] = i;
+        }
+        var resampledBuffer1 = buffer.resample(2.0);
+        var resampledBuffer2 = buffer.resample(0.5);
+
+        return assert(resampledBuffer1.channels[0][1] == 0.5 && resampledBuffer2.channels[0][1] == 2);
     }
 
 }

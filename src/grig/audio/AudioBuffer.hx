@@ -1,5 +1,6 @@
 package grig.audio;
 
+import grig.audio.AudioChannel.AudioChannelData;
 #if (js && !nodejs && !heaps)
 typedef AudioBuffer = grig.audio.js.webaudio.AudioBuffer;
 #elseif python
@@ -29,11 +30,30 @@ class AudioBuffer
         sampleRate = _sampleRate;
     }
 
+    public static function create(numChannels:Int, numSamples:Int, sampleRate:Float):AudioBuffer
+    {
+        var channels = new Array<AudioChannel>();
+        for (c in 0...numChannels) {
+            channels.push(new AudioChannel(new AudioChannelData(numSamples)));
+        }
+        return new AudioBuffer(channels, sampleRate);
+    }
+
     public function clear():Void
     {
         for (channel in channels) {
             channel.clear();
         }
+    }
+
+    public function resample(ratio:Float, repitch:Bool = false)
+    {
+        var newChannels = new Array<AudioChannel>();
+        if (ratio == 0) return new AudioBuffer(newChannels, 44100.0);
+        for (channel in channels) {
+            newChannels.push(LinearInterpolator.resampleChannel(channel, ratio));
+        }
+        return new AudioBuffer(newChannels, repitch ? sampleRate : sampleRate * ratio);
     }
 }
 

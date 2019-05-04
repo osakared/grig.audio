@@ -27,6 +27,19 @@ abstract AudioChannelData(Ndarray)
     {
         return python.Syntax.code('len({0})', this);
     }
+
+    public function copyInto(other:AudioChannelData, sourceStart:Int = 0, length:Null<Int> = null)
+    {
+        // This can probably be replaced by a more efficient numpy function
+        var minLength = (get_length() - sourceStart) > other.length ? other.length : (get_length() - sourceStart);
+        if (sourceStart < 0) sourceStart = 0;
+        if (length == null || length > minLength) {
+            length = minLength;
+        }
+        for (i in 0...length) {
+            other[i] = get(sourceStart + i);
+        }
+    }
 }
 
 #end

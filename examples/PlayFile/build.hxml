@@ -1,0 +1,19 @@
+-cp src
+-cp ../../src
+-dce no
+-lib tink_core
+-lib format
+-resource DeepElmBlues.wav@DeepElmBlues.wav
+-main Main
+
+--each
+
+-js bin/PlayFile.js
+
+--next
+
+-python bin/PlayFile.py
+
+--next
+
+-cpp bin/PlayFile
