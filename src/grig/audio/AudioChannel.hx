@@ -58,18 +58,19 @@ abstract AudioChannel(AudioChannelData)
         Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
         Values in other are replaced with values from calling `AudioChannel`.
     **/
-    public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null)
+    public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
     {
-        var minLength = (this.length - sourceStart) > other.length ? other.length : (this.length - sourceStart);
+        var minLength = (this.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (this.length - sourceStart);
         if (sourceStart < 0) sourceStart = 0;
+        if (otherStart < 0) otherStart = 0;
         if (length == null || length > minLength) {
             length = minLength;
         }
         #if cpp
-        Vector.blit(this, sourceStart, cast other, 0, length);
+        Vector.blit(this, sourceStart, cast other, otherStart, length);
         #else
         for (i in 0...length) {
-            other[i] = this[sourceStart + i];
+            other[otherStart + i] = this[sourceStart + i];
         }
         #end
     }

@@ -1,0 +1,17 @@
+-cp src
+-cp ../../src
+-dce no
+-lib tink_core
+-main Main
+
+--each
+
+# -js bin/Chipmunk.js
+
+# --next
+
+# -python bin/Chipmunk.py
+
+--next
+
+-cpp bin/Chipmunk
