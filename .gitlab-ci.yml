@@ -3,7 +3,7 @@ image: osakared/haxe-ci
 test:
   script:
    - lix download
-   - pip3 install numpy scipy
+   - pip install numpy scipy
    - git submodule init
    - git submodule update
    - haxe tests.hxml --interp
