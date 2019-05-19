@@ -11,7 +11,7 @@ install:
 
 script:
   - lix download
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix python ; fi
+  - #if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix python ; fi
   - haxelib run travix node
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix js       ; fi
   - #if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix java   ; fi
