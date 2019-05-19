@@ -32,6 +32,11 @@ abstract AudioBufferData(Ndarray)
     {
         this.fill(0.0);
     }
+
+    public function applyGain(gain:Float)
+    {
+        python.Syntax.code('{0} *= {1}', this, gain);
+    }
 }
 
 #end

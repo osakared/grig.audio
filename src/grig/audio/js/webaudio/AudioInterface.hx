@@ -33,7 +33,7 @@ typedef WorkletPorts = Array<Array<js.lib.Float32Array>>;
 class AudioInterface
 {
     private var audioCallback:AudioCallback;
-    public var audioContext(default, null):AudioContext;
+    public static var audioContext(default, null) = new AudioContext();
     public var isOpen(default, null):Bool = false;
     private var sampleRate:Float;
     private var processor:AudioNode;
@@ -56,7 +56,6 @@ class AudioInterface
             throw new Error(InternalError, 'In webaudio, only "Browser" api supported');
         }
 
-        audioContext = new AudioContext();
         sampleRate = js.Syntax.code('{0}.sampleRate', audioContext);
     }
 

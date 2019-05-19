@@ -56,6 +56,20 @@ class AudioBuffer
         }
         return new AudioBuffer(new AudioBufferData(outputData), repitch ? sampleRate : sampleRate * ratio);
     }
+
+    public function copyInto(other:AudioBuffer, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
+    {
+        var minLength = (length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (length - sourceStart);
+        if (sourceStart < 0) sourceStart = 0;
+        if (otherStart < 0) otherStart = 0;
+        if (length == null || length > minLength) {
+            length = minLength;
+        }
+        var numChannels = channels.length > other.channels.length ? other.channels.length : channels.length;
+        for (c in 0...numChannels) {
+            channels[c].copyInto(other.channels[c], sourceStart, length, otherStart);
+        }
+    }
 }
 
 #end

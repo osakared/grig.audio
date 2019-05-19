@@ -1,12 +1,15 @@
 package grig.audio.format.wav;
 
+#if (js && !format && !nodejs)
+typedef Reader = grig.audio.js.webaudio.Reader;
+#elseif format
+
 import format.wav.Data;
 import haxe.io.Input;
 import grig.audio.AudioChannel;
-
-#if (!js && !format)
-#error "Wav requires format or js/html environment";
-#end
+import tink.core.Error;
+import tink.core.Future;
+import tink.core.Outcome;
 
 class Reader
 {
@@ -17,7 +20,7 @@ class Reader
         input = _input;
     }
 
-    public function load():AudioBuffer
+    public function load():Surprise<AudioBuffer, tink.core.Error>
     {
         var reader = new format.wav.Reader(input);
         var wav = reader.read();
@@ -43,3 +46,7 @@ class Reader
         return buffer;
     }
 }
+
+#else
+#error "Requires either js/html environment or format haxelib"
+#end

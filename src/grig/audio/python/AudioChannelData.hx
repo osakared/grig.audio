@@ -28,17 +28,22 @@ abstract AudioChannelData(Ndarray)
         return python.Syntax.code('len({0})', this);
     }
 
-    public function copyInto(other:AudioChannelData, sourceStart:Int = 0, length:Null<Int> = null)
+    public function copyInto(other:AudioChannelData, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
     {
-        // This can probably be replaced by a more efficient numpy function
-        var minLength = (get_length() - sourceStart) > other.length ? other.length : (get_length() - sourceStart);
+        var minLength = (get_length() - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (get_length() - sourceStart);
         if (sourceStart < 0) sourceStart = 0;
+        if (otherStart < 0) otherStart = 0;
         if (length == null || length > minLength) {
             length = minLength;
         }
         for (i in 0...length) {
-            other[i] = get(sourceStart + i);
+            other[otherStart + i] = get(sourceStart + i);
         }
+    }
+
+    public function applyGain(gain:Float)
+    {
+        python.Syntax.code('{0} *= {1}', this, gain);
     }
 }
 

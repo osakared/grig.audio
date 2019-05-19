@@ -49,7 +49,8 @@ class Main
             if (port.isDefaultInput) {
                 options.inputNumChannels = port.maxInputChannels;
                 options.inputPort = port.portID;
-                options.sampleRate = port.defaultSampleRate;                options.inputLatency = port.defaultLowInputLatency;
+                options.sampleRate = port.defaultSampleRate;
+                options.inputLatency = port.defaultLowInputLatency;
             }
             if (port.isDefaultOutput) {
                 options.outputNumChannels = port.maxOutputChannels;

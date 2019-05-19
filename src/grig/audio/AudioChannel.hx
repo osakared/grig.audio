@@ -62,6 +62,7 @@ abstract AudioChannel(AudioChannelData)
     {
         var minLength = (this.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (this.length - sourceStart);
         if (sourceStart < 0) sourceStart = 0;
+        if (sourceStart >= this.length) return;
         if (otherStart < 0) otherStart = 0;
         if (length == null || length > minLength) {
             length = minLength;
