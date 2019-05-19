@@ -7,7 +7,6 @@ os:
 
 install:
   - npm install -g lix
-  - pip install numpy scipy
 
 script:
   - lix download
