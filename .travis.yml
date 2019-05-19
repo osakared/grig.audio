@@ -7,7 +7,7 @@ os:
 
 install:
   - npm install -g lix
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install php7.1-cli
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install php7.1-cli ; fi
 
 script:
   - lix download
