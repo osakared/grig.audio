@@ -14,6 +14,7 @@ class Main
     private static function audioCallback(input:AudioBuffer, output:AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
         output.clear();
+        if (buffer == null) return;
         if (location >= buffer.length) return;
         var numChannels = buffer.channels.length > output.channels.length ? output.channels.length : buffer.channels.length;
         var samplesRemaining = buffer.length - location;
@@ -43,11 +44,6 @@ class Main
 
     static function main()
     {
-        var musicBytes = haxe.Resource.getBytes('DeepElmBlues.wav');
-        var musicInput = new haxe.io.BytesInput(musicBytes);
-        var musicLoader = new grig.audio.format.wav.Reader(musicInput);
-        buffer = musicLoader.load();
-
         var audioInterface = new AudioInterface();
         var ports = audioInterface.getPorts();
         var options:grig.audio.AudioInterfaceOptions = {};
@@ -59,10 +55,23 @@ class Main
                 options.outputLatency = port.defaultLowOutputLatency;
             }
         }
-        if (buffer.sampleRate != options.sampleRate) {
-            buffer = buffer.resample(options.sampleRate / buffer.sampleRate);
-        }
         audioInterface.setCallback(audioCallback);
+        
+        var musicBytes = haxe.Resource.getBytes('DeepElmBlues.wav');
+        var musicInput = new haxe.io.BytesInput(musicBytes);
+        var musicLoader = new grig.audio.format.wav.Reader(musicInput);
+        musicLoader.load().handle(function(bufferOutcome) {
+            switch bufferOutcome {
+                case Success(_buffer):
+                    buffer = _buffer;
+                    if (buffer.sampleRate != options.sampleRate) {
+                        buffer = buffer.resample(options.sampleRate / buffer.sampleRate);
+                    }
+                case Failure(error):
+                    throw error;
+            }
+        });
+
         audioInterface.openPort(options).handle(function(audioOutcome) {
             switch audioOutcome {
                 case Success(_):
