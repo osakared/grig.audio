@@ -6,6 +6,8 @@ abstract AudioChannelData(Ndarray)
 {
     public var length(get, never):Int;
 
+    static private var sumOfSquaresThreshold:Float = 0.1;
+
     public function new(arry:Ndarray)
     {
         this = arry;
@@ -44,6 +46,27 @@ abstract AudioChannelData(Ndarray)
     public function applyGain(gain:Float)
     {
         python.Syntax.code('{0} *= {1}', this, gain);
+    }
+
+    /** Sum of squares of the data. A quick and dirty way to check energy level **/
+    public function sumOfSquares():Float
+    {
+        var sum:Float = 0.0;
+        for (i in 0...get_length()) {
+            sum += get(i);
+        }
+        var avg:Float = sum / get_length();
+        var squaresSum:Float = 0.0;
+        for (i in 0...get_length()) {
+            squaresSum += Math.pow(get(i) - avg, 2.0);
+        }
+        return squaresSum;
+    }
+
+    /** Uses sum of squares to determine sufficiently low energy **/
+    public function isSilent():Bool
+    {
+        return sumOfSquares() < sumOfSquaresThreshold;
     }
 }
 
