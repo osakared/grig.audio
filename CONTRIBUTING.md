@@ -9,6 +9,7 @@
 There are lots of ways of contributing, even if you don't code or don't feel like working on this codebase! Here are a few ways you can help:
 
 * Use it! Just seeing that people are cloning, starring and following gives us the motivation to spend time on this
+* Create pull requests with your fixes and enhancements
 * [Create and comment on issues](https://gitlab.com/haxe-grig/grig.audio/-/issues)
 * [Sponsor the maintainer](https://github.com/sponsors/thomasjwebb)
 * Tell your friends and colleagues about this repo!
