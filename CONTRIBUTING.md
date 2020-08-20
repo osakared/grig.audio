@@ -22,4 +22,4 @@ Issues are a great place to report bugs and contribute ideas for changes/new fea
 
 Please ensure that there's an issue for the bug you're fixing or feature you're implementing. If not, create it. Then create a pull request against the main branch of the official repo. Ensure any new functionality has unit tests on it (see `tests.hxml` and `tests/` for existing tests). Ensure the code you add is in the same style as the file it's in. Generally, we use detached brackets for classes and functions, connected for control statements. backCamel for function names and variables, CamelCase for classes and constants.
 
-Contributions don't have to be to code. Fix and add documentation, `.md` files, etc.
+Contributions don't have to be to code. Fix and add documentation, `.md` files, etc. If you are changing `CONTRIBUTING.md` or `CODE_OF_CONDUCT.md`, make sure to make the update in all other repos in the project (haxe-grig) as well.
