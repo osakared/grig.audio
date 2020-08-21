@@ -12,8 +12,8 @@
   "contributors": [
     "thomasjwebb"
   ],
-  "releasenote": "Initial release",
-  "version": "0.0.4",
+  "releasenote": "Added realtime audio checker",
+  "version": "0.0.5",
   "dependencies": {
     "tink_core": "1.26.0"
   }
