@@ -1,6 +1,6 @@
 {
   "name": "grig.audio",
-  "url" : "https://haxe-grig.gitlab.io/grig/",
+  "url" : "https://grig.tech/",
   "license": "MIT",
   "tags": [
     "audio",
@@ -13,8 +13,8 @@
     "thomasjwebb"
   ],
   "releasenote": "Initial release",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "dependencies": {
-    "tink_core": "1.20.0"
+    "tink_core": "1.26.0"
   }
 }
