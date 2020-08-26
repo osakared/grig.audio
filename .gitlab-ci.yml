@@ -17,17 +17,9 @@ test:
    - ./scripts/verify_retval.sh "haxe tests/macro/fail.hxml" 1
    - ./scripts/verify_retval.sh "haxe tests/macro/succeed.hxml" 0
 
-trigger_build:
-  stage: deploy
-  only:
-    refs:
-      - master
-  script:
-    - "curl -X POST -d {} https://api.netlify.com/build_hooks/$NETLIFY_TOKEN"
-
 release:
   stage: deploy
   only:
     - tags
   script:
-    - bash ./release_haxelib.sh $HAXELIB_PWD
+    - bash ./scripts/release_haxelib.sh $HAXELIB_PWD

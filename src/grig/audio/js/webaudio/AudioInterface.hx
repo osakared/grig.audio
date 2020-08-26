@@ -33,7 +33,7 @@ typedef WorkletPorts = Array<Array<js.lib.Float32Array>>;
 class AudioInterface
 {
     private var audioCallback:AudioCallback;
-    public static var audioContext(default, null) = new AudioContext();
+    private static var audioContext:AudioContext = null;
     public var isOpen(default, null):Bool = false;
     private var sampleRate:Float;
     private var processor:AudioNode;
@@ -50,13 +50,22 @@ class AudioInterface
         audioCallback(new AudioBuffer(event.inputBuffer), new AudioBuffer(event.outputBuffer), event.outputBuffer.sampleRate, streamInfo);
     }
 
+    private function instantiateContext():Void
+    {
+        if (audioContext == null) {
+            audioContext = AudioContextFactory.createAudioContext();
+        }
+
+        sampleRate = js.Syntax.code('{0}.sampleRate', audioContext);
+    }
+
     public function new(api:grig.audio.Api = grig.audio.Api.Unspecified)
     {
         if (api != grig.audio.Api.Unspecified && api != grig.audio.Api.Browser) {
             throw new Error(InternalError, 'In webaudio, only "Browser" api supported');
         }
 
-        sampleRate = js.Syntax.code('{0}.sampleRate', audioContext);
+        sampleRate = 44100;
     }
 
     public static function getApis():Array<Api>
@@ -64,6 +73,7 @@ class AudioInterface
         return [Api.Browser];
     }
 
+    // We should probably make this asynchronous too!
     public function getPorts():Array<PortInfo>
     {
         return [
@@ -80,13 +90,14 @@ class AudioInterface
         ];
     }
 
-    private function requestAudioAccess(options:AudioInterfaceOptions):js.Promise<Null<MediaStreamAudioSourceNode>>
+    private function requestAudioAccess(options:AudioInterfaceOptions):js.lib.Promise<Null<MediaStreamAudioSourceNode>>
     {
-        var promise:js.Promise<js.html.MediaStream> = js.Syntax.code('navigator.mediaDevices.getUserMedia({audio:true})');
+        instantiateContext();
+        var promise:js.lib.Promise<js.html.MediaStream> = js.Syntax.code('navigator.mediaDevices.getUserMedia({audio:true})');
         return promise.then(function(mediaStream:js.html.MediaStream) {
-            return js.Promise.resolve(audioContext.createMediaStreamSource(mediaStream));
-        }).catchError(function(e:js.Error) {
-            return js.Promise.reject(e);
+            return js.lib.Promise.resolve(audioContext.createMediaStreamSource(mediaStream));
+        }).catchError(function(e:js.lib.Error) {
+            return js.lib.Promise.reject(e);
         });
     }
 
@@ -101,6 +112,7 @@ class AudioInterface
     {
         return Future.async(function(_callback) {
             try {
+                instantiateContext();
                 if (isOpen) throw 'Already opened port';
                 fillMissingOptions(options);
                 if (options.outputNumChannels > audioContext.destination.channelCount) {
@@ -124,7 +136,7 @@ class AudioInterface
 
                     isOpen = true;
                     _callback(Success(this));
-                }).catchError(function(e:js.Error) {
+                }).catchError(function(e:js.lib.Error) {
                     _callback(Failure(new Error(InternalError, e.message)));
                 });
             }

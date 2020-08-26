@@ -12,6 +12,10 @@ typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
 typedef AudioInterface = grig.audio.python.AudioInterface;
 #else
 
+/**
+ * Generic AudioInterface that abstracts over different apis depending on the target.
+ * See [grig's website](https://grig.tech/tutorial/#audio-connection) for a tutorial on basic use.
+ */
 extern class AudioInterface
 {
     public var isOpen(default, null):Bool;
