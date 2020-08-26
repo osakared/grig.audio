@@ -14,7 +14,7 @@ typedef AudioInterface = grig.audio.python.AudioInterface;
 
 /**
  * Generic AudioInterface that abstracts over different apis depending on the target.
- * See [grig's website](https://grig.tech/tutorial/#audio-connection) for a tutorial on basic use.
+ * See [grig's website](https://grig.tech/audio-connection) for a tutorial on basic use.
  */
 extern class AudioInterface
 {
