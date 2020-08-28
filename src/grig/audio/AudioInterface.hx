@@ -2,13 +2,13 @@ package grig.audio;
 
 import tink.core.Future;
 
-#if heaps // we need to override if making a plugin or if the user forces override
+#if (heaps && !disable_heaps_audio_interface)
 typedef AudioInterface = NativeChannelAudioInterface;
-#elseif (js && !nodejs)
+#elseif (js && !nodejs && !disable_webaudio_audio_interface)
 typedef AudioInterface = grig.audio.js.webaudio.AudioInterface;
-#elseif cpp
+#elseif (cpp && !disable_pa_audio_interface)
 typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
-#elseif python
+#elseif (python && !disable_python_audio_interface)
 typedef AudioInterface = grig.audio.python.AudioInterface;
 #else
 
