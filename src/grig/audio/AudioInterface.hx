@@ -2,13 +2,13 @@ package grig.audio;
 
 import tink.core.Future;
 
-#if (heaps && !disable_heaps_audio_interface)
+#if (heaps && !DISABLE_HEAPS_AUDIO_INTERFACE)
 typedef AudioInterface = NativeChannelAudioInterface;
-#elseif (js && !nodejs && !disable_webaudio_audio_interface)
+#elseif (js && !nodejs && !DISABLE_WEBAUDIO_AUDIO_INTERFACE)
 typedef AudioInterface = grig.audio.js.webaudio.AudioInterface;
-#elseif (cpp && !disable_pa_audio_interface)
+#elseif (cpp && !DISABLE_PA_AUDIO_INTERFACE)
 typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
-#elseif (python && !disable_python_audio_interface)
+#elseif (python && !DISABLE_PYTHON_AUDIO_INTERFACE)
 typedef AudioInterface = grig.audio.python.AudioInterface;
 #else
 
