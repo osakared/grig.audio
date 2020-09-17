@@ -33,7 +33,7 @@ typedef WorkletPorts = Array<Array<js.lib.Float32Array>>;
 class AudioInterface
 {
     private var audioCallback:AudioCallback;
-    private static var audioContext:AudioContext = null;
+    public static var audioContext:AudioContext = null;
     public var isOpen(default, null):Bool = false;
     private var sampleRate:Float;
     private var processor:AudioNode;
