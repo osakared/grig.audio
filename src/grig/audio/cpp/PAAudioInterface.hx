@@ -160,7 +160,7 @@ class PAAudioInterface
         if (audioInterface.inputBuffer == null) {
             var inputChannels = new Array<AudioChannel>();
             for (i in 0...audioInterface.inputNumChannels) {
-                inputChannels.push(new AudioChannel(new AudioChannelData(frameCount)));
+                inputChannels.push(new AudioChannel(frameCount));
             }
             audioInterface.inputBuffer = new AudioBuffer(inputChannels, audioInterface.sampleRate);
         }
@@ -168,22 +168,17 @@ class PAAudioInterface
         untyped __cpp__('float **inputChannels = (float**)input');
         for (c in 0...audioInterface.inputNumChannels) {
             for (i in 0...frameCount) {
-                audioInterface.inputBuffer.channels[c][i] = untyped __cpp__('inputChannels[{0}][{1}]', c, i);
+                audioInterface.inputBuffer[c][i] = untyped __cpp__('inputChannels[{0}][{1}]', c, i);
             }
         }
 
-        if (audioInterface.outputBuffer == null) {
+        if (audioInterface.outputBuffer == null || 
+            (audioInterface.outputNumChannels != audioInterface.outputBuffer.length || (audioInterface.outputBuffer.length > 0 && audioInterface.outputBuffer[0].length != frameCount))) {
             var outputChannels = new Array<AudioChannel>();
             for (i in 0...audioInterface.outputNumChannels) {
-                outputChannels.push(new AudioChannel(new AudioChannelData(frameCount)));
+                outputChannels.push(new AudioChannel(frameCount));
             }
             audioInterface.outputBuffer = new AudioBuffer(outputChannels, audioInterface.sampleRate);
-        }
-        for (i in 0...audioInterface.outputNumChannels) {
-            if (audioInterface.outputBuffer.channels[i].length != frameCount) {
-                audioInterface.outputBuffer.channels[i] = new AudioChannel(new AudioChannelData(frameCount));
-            }
-            else break; // Assuming they're all the same length
         }
         audioInterface.outputBuffer.clear();
 
@@ -204,7 +199,7 @@ class PAAudioInterface
         var channel;
         var val;
         for (c in 0...audioInterface.outputNumChannels) {
-            channel = audioInterface.outputBuffer.channels[c];
+            channel = audioInterface.outputBuffer[c];
             for (i in 0...frameCount) {
                 val = channel[i];
                 untyped __cpp__('outputChannels[{0}][{1}] = {2}', c, i, val);

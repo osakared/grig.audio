@@ -1,0 +1,28 @@
+-D doc-gen
+--macro exclude('tink.core.Future')
+--macro include('grig.audio', true, ['grig.audio.format.mp3.Reader', 'grig.audio.format.wav.Reader', 'tink.*'])
+--no-output
+-lib tink_core
+-lib format
+-cp src
+
+-xml bin/doc.xml
+
+--each
+
+--next
+-xml bin/js.xml
+-js dummy.js
+
+--next
+-xml bin/nodejs.xml
+-lib hxnodejs
+-js dummy.js
+
+# --next
+# -xml bin/python.xml
+# -python dummy.py
+
+--next
+-xml bin/cpp.xml
+-cpp dummy

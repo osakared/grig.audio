@@ -19,19 +19,21 @@ abstract AudioChannel(AudioChannelData)
     static private var sumOfSquaresThreshold:Float = 0.1;
 
     /** Creates a new silent buffer **/
-    public function new(i:AudioChannelData)
+    public function new(len:Int)
     {
-        this = i;
+        this = new AudioChannelData(len);
     }
 
     @:arrayAccess
     inline function getSample(index:Int)
+    {
         return this[index];
+    }
 
     @:arrayAccess
-    inline function setSample(index:Null<Int>, sample:Float):Float {
+    inline function setSample(index:Null<Int>, sample:Float):Float
+    {
         return this[index] = sample;
-
     }
 
     // TODO should have an otherStart parameter and honor it
@@ -88,7 +90,7 @@ abstract AudioChannel(AudioChannelData)
     /** Create a new `AudioChannel` with the same parameters and data (deep copy) **/
     public function copy():AudioChannel
     {
-        var newChannel = new AudioChannel(new AudioChannelData(this.length));
+        var newChannel = new AudioChannel(this.length);
         copyInto(newChannel);
         return newChannel;
     }

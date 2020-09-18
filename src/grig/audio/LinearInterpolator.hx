@@ -13,7 +13,7 @@ class LinearInterpolator
     public static function resampleChannel(input:AudioChannel, ratio:Float):AudioChannel
     {
         var newNumSamples = Math.ceil(input.length * ratio);
-        var newAudioChannel = new AudioChannel(new AudioChannelData(newNumSamples));
+        var newAudioChannel = new AudioChannel(newNumSamples);
         resampleIntoChannel(input, newAudioChannel, ratio);
         return newAudioChannel;
     }

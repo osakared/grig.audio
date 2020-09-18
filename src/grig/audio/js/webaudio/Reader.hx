@@ -20,7 +20,7 @@ class Reader
             try {
                 var bytes = input.readAll();
                 AudioInterface.audioContext.decodeAudioData(bytes.getData(), function(buffer:js.html.audio.AudioBuffer) {
-                    _callback(Success(new AudioBuffer(buffer)));
+                    _callback(Success(cast buffer));
                 }, function(error:js.html.DOMException) {
                     _callback(Failure(new Error(InternalError, 'Failed to load audio data. ${error.message}')));
                 });
