@@ -13,7 +13,7 @@ class Main
     {
         var channel = output.channels[0];
         for (i in 0...channel.length) {
-            phase += 0.01;
+            phase += 0.1;
             channel[i] = Math.sin(phase) * 0.3 + input.channels[0][i] * 0.3;
         }
     }
@@ -22,7 +22,7 @@ class Main
     {
         var channel = output.channels[0];
         for (i in 0...channel.length) {
-            phase += 0.01;
+            phase += 0.1;
             channel[i] = Math.sin(phase);
         }
     }
@@ -56,6 +56,10 @@ class Main
         var ports = audioInterface.getPorts();
         trace(ports);
         var options:grig.audio.AudioInterfaceOptions = {};
+        if (ports.length < 1) {
+            trace('No ports found');
+            return;
+        }
         for (port in ports) {
             if (port.isDefaultInput) {
                 options.inputNumChannels = port.maxInputChannels;

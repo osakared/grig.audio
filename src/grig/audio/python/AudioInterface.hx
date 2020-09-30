@@ -5,6 +5,7 @@ import grig.audio.AudioCallback;
 import grig.audio.AudioChannel;
 import grig.audio.python.numpy.Ndarray;
 import python.Dict;
+import python.Exceptions;
 import python.KwArgs;
 import python.Tuple;
 import python.VarArgs;
@@ -144,9 +145,13 @@ class AudioInterface
         }
 
         for (sampleRate in grig.audio.SampleRate.commonSampleRates) {
-            var ret = pyAudio.is_format_supported(sampleRate, inputPort, portInfo.maxInputChannels, sampleFormat,
-                                                  outputPort, portInfo.maxOutputChannels, sampleFormat);
-            if (ret) portInfo.sampleRates.push(sampleRate);
+            try {
+                var ret = pyAudio.is_format_supported(sampleRate, inputPort, portInfo.maxInputChannels, sampleFormat,
+                                                    outputPort, portInfo.maxOutputChannels, sampleFormat);
+                if (ret) portInfo.sampleRates.push(sampleRate);
+            }
+            catch (exception:python.Exception) {
+            }
         }
 
     }
