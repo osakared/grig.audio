@@ -1,5 +1,6 @@
 #include "portaudio/portaudio/include/portaudio.h"
 
+#include <grig/audio/ChannelsAudioChannel.h>
 #include <string>
 #include <vector>
 
@@ -116,15 +117,17 @@ int grig_callback(const void *input, void *output, unsigned long frameCount, con
     auto inputChannels = (float**)input;
     auto outputChannels = (float**)output;
 
-    for (size_t c = 0; c < audioInterface->inputBuffer->channels->size(); ++c) {
-        auto channel = (::Array< float >)audioInterface->inputBuffer->channels->__unsafe_get(c);
-        channel->setUnmanagedData(inputChannels[c], frameCount);
+    auto inputBuffer = (::grig::audio::ChannelsAudioBuffer)audioInterface->inputBuffer;
+    auto outputBuffer = (::grig::audio::ChannelsAudioBuffer)audioInterface->outputBuffer;
+
+    for (size_t c = 0; c < inputBuffer->channels->size(); ++c) {
+        auto channel = inputBuffer->getChannel(c);
+        channel->channel->setUnmanagedData(inputChannels[c], frameCount);
     }
-    for (size_t c = 0; c < audioInterface->outputBuffer->channels->size(); ++c) {
-        auto channel = (::Array< float >)audioInterface->outputBuffer->channels->__unsafe_get(c);
-        channel->setUnmanagedData(outputChannels[c], frameCount);
+    for (size_t c = 0; c < outputBuffer->channels->size(); ++c) {
+        auto channel = outputBuffer->getChannel(c);
+        channel->channel->setUnmanagedData(outputChannels[c], frameCount);
     }
-    // audioInterface->outputBuffer->channels->setUnmanagedData(output, audioInterface->outputBuffer->numChannels * frameCount);
 
     audioInterface->callAudioCallback();
 

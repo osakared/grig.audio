@@ -2,6 +2,8 @@ package grig.audio.cpp; #if cpp
 
 import cpp.vm.Gc;
 import grig.audio.AudioBuffer;
+import grig.audio.ChannelsAudioBuffer;
+import grig.audio.ChannelsAudioChannel;
 import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
@@ -22,7 +24,7 @@ extern class PortAudio
     static public function openPort(audioInterface:AudioInterface, options:AudioInterfaceOptions, stream:cpp.RawPointer<PAStream>, errors:Array<String>):Void;
 }
 
-@:build(grig.audio.cpp.PABuild.xml())
+@:build(grig.audio.cpp.Build.xml())
 @:cppInclude('./portaudio.cc')
 class AudioInterface
 {
@@ -44,7 +46,7 @@ class AudioInterface
     public function callAudioCallback()
     {
         if (audioCallback == null) return;
-        
+
         audioCallback(inputBuffer, outputBuffer, inputBuffer.sampleRate, streamInfo);
     }
 
@@ -76,8 +78,9 @@ class AudioInterface
         if (options.outputNumChannels == null) options.outputNumChannels = 2;
         if (options.sampleRate == null) options.sampleRate = 44100.0;
         if (options.bufferSize == null) options.bufferSize = 256;
-        inputBuffer = AudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
-        outputBuffer = AudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+        
+        inputBuffer = ChannelsAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
+        outputBuffer = ChannelsAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
     }
 
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>

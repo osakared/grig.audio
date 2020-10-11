@@ -11,16 +11,16 @@ class Main
 
     private static function audioCallbackWithInput(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
-        var channel = output.channels[0];
+        var channel = output[0];
         for (i in 0...channel.length) {
             phase += 0.1;
-            channel[i] = Math.sin(phase) * 0.3 + input.channels[0][i] * 0.3;
+            channel[i] = Math.sin(phase) * 0.3 + input[0][i] * 0.3;
         }
     }
 
     private static function audioCallback(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
-        var channel = output.channels[0];
+        var channel = output[0];
         for (i in 0...channel.length) {
             phase += 0.1;
             channel[i] = Math.sin(phase);
