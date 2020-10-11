@@ -1,20 +1,28 @@
 package grig.audio;
 
-import grig.audio.AudioChannel.AudioChannelData;
 #if (js && !nodejs && !heaps)
 typedef AudioBuffer = grig.audio.js.webaudio.AudioBuffer;
 #elseif python
 typedef AudioBuffer = grig.audio.python.AudioBuffer;
 #else
 
+import grig.audio.AudioChannel.AudioChannelData;
+
 class AudioBuffer
 {
     /** Sample rate of the signal contained within **/
     public var sampleRate(default, null):Float;
     public var channels:Array<AudioChannel>;
-    public var length(get, never):Int;
+    public var numChannels(get, never):Int;
+    /** Samples per channel **/
+    public var numSamples(get, never):Int;
 
-    private function get_length():Int
+    public function get_numChannels():Int
+    {
+        return channels.length;
+    }
+
+    private function get_numSamples():Int
     {
         if (channels.length < 1) {
             return 0;
@@ -58,7 +66,7 @@ class AudioBuffer
 
     public function copyInto(other:AudioBuffer, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
     {
-        var minLength = (length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (length - sourceStart);
+        var minLength = (length - sourceStart) > (other.numSamples - otherStart) ? (other.numSamples - otherStart) : (length - sourceStart);
         if (sourceStart < 0 || sourceStart >= length) sourceStart = 0;
         if (otherStart < 0) otherStart = 0;
         if (length == null || length > minLength) {

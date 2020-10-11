@@ -18,7 +18,6 @@ abstract AudioChannel(AudioChannelData)
 {    
     static private var sumOfSquaresThreshold:Float = 0.1;
 
-    /** Creates a new silent buffer **/
     public function new(i:AudioChannelData)
     {
         this = i;
@@ -26,12 +25,16 @@ abstract AudioChannel(AudioChannelData)
 
     @:arrayAccess
     inline function getSample(index:Int)
+    {
+        // use unsafeget on cpp
         return this[index];
+    }
 
     @:arrayAccess
-    inline function setSample(index:Null<Int>, sample:Float):Float {
+    inline function setSample(index:Int, sample:AudioSampleData):AudioSampleData
+    {
+        // use unsafeset on cpp
         return this[index] = sample;
-
     }
 
     // TODO should have an otherStart parameter and honor it
@@ -53,13 +56,13 @@ abstract AudioChannel(AudioChannelData)
         }
     }
 
-    // TODO should have an otherStart parameter and honor it
     /**
         Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
         Values in other are replaced with values from calling `AudioChannel`.
     **/
     public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
     {
+        trace('sourceStart: $sourceStart, length: $length, otherStart: $otherStart');
         var minLength = (this.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (this.length - sourceStart);
         if (sourceStart < 0) sourceStart = 0;
         if (sourceStart >= this.length) return;

@@ -15,12 +15,12 @@ class Main
     {
         output.clear();
         if (buffer == null) return;
-        if (location >= buffer.length) return;
-        var numChannels = buffer.channels.length > output.channels.length ? output.channels.length : buffer.channels.length;
-        var samplesRemaining = buffer.length - location;
-        var numSamples = samplesRemaining > output.length ? output.length : samplesRemaining;
+        if (location >= buffer.numSamples) return;
+        var numChannels = buffer.numSamples > output.numSamples ? output.numSamples : buffer.numSamples;
+        var samplesRemaining = buffer.numSamples - location;
+        var numSamples = samplesRemaining > output.numSamples ? output.numSamples : samplesRemaining;
         for (c in 0...numChannels) {
-            buffer.channels[c].copyInto(output.channels[c], location, numSamples);
+            buffer.getChannel(c).copyInto(output.getChannel(c), location, numSamples);
         }
         location += numSamples;
     }
@@ -44,6 +44,7 @@ class Main
 
     static function main()
     {
+        trace(AudioInterface.getApis());
         var audioInterface = new AudioInterface();
         var ports = audioInterface.getPorts();
         var options:grig.audio.AudioInterfaceOptions = {};
