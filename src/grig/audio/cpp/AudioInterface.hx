@@ -78,7 +78,9 @@ class AudioInterface
         if (options.outputNumChannels == null) options.outputNumChannels = 2;
         if (options.sampleRate == null) options.sampleRate = 44100.0;
         if (options.bufferSize == null) options.bufferSize = 256;
-        
+        if (options.inputLatency == null) options.inputLatency = 0.01;
+        if (options.outputLatency == null) options.outputLatency = 0.01;
+
         inputBuffer = ChannelsAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
         outputBuffer = ChannelsAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
     }

@@ -1,6 +1,7 @@
 #include "portaudio/portaudio/include/portaudio.h"
 
 #include <grig/audio/ChannelsAudioChannel.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -142,7 +143,7 @@ void pa_check_errors(PaError err, ::Array<::String> errors)
     errors->push(String(errorInfo->errorText).dup());
 }
 
-void open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface, ::Dynamic options, PaStream **stream, ::Array<::String> errors)
+int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface, ::Dynamic options, PaStream **stream, ::Array<::String> errors)
 {
     auto inputPortVal = options->__Field(HX_CSTRING("inputPort"), HX_PROP_DYNAMIC);
     auto outputPortVal = options->__Field(HX_CSTRING("outputPort"), HX_PROP_DYNAMIC);
@@ -151,14 +152,40 @@ void open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterfac
     unsigned long framesPerBuffer = options->__Field(HX_CSTRING("bufferSize"), HX_PROP_DYNAMIC).asInt();
     double sampleRate = options->__Field(HX_CSTRING("sampleRate"), HX_PROP_DYNAMIC).asDouble();
 
-    // if (inputPortVal.isNull() && outputPortVal.isNull()) {
+    if (inputPortVal.isNull() && outputPortVal.isNull()) {
+        auto ret = Pa_OpenDefaultStream(stream, numInputChannels, numOutputChannels, SAMPLE_FORMAT, sampleRate, framesPerBuffer,
+                                        grig_callback, audioInterface.GetPtr());
+        pa_check_errors(ret, errors);
+        if (ret != 0) return ret;
+        ret = Pa_StartStream(*stream);
+        pa_check_errors(ret, errors);
+        return ret;
+    }
+    
+    std::unique_ptr<PaStreamParameters> inputParameters(nullptr);
+    if (!inputPortVal.isNull()) {
+        inputParameters.reset(new PaStreamParameters());
+        inputParameters->device = inputPortVal.asInt();
+        inputParameters->channelCount = numInputChannels;
+        inputParameters->sampleFormat = SAMPLE_FORMAT;
+        inputParameters->suggestedLatency = options->__Field(HX_CSTRING("inputLatency"), HX_PROP_DYNAMIC).asDouble();
+        inputParameters->hostApiSpecificStreamInfo = nullptr;
+    }
+    std::unique_ptr<PaStreamParameters> outputParameters(nullptr);
+    if (!outputPortVal.isNull()) {
+        outputParameters.reset(new PaStreamParameters());
+        outputParameters->device = outputPortVal.asInt();
+        outputParameters->channelCount = numOutputChannels;
+        outputParameters->sampleFormat = SAMPLE_FORMAT;
+        outputParameters->suggestedLatency = options->__Field(HX_CSTRING("outputLatency"), HX_PROP_DYNAMIC).asDouble();
+        outputParameters->hostApiSpecificStreamInfo = nullptr;
+    }
 
-    // }
-    auto ret = Pa_OpenDefaultStream(stream, numInputChannels, numOutputChannels, SAMPLE_FORMAT, sampleRate, framesPerBuffer,
-                                    grig_callback, audioInterface.GetPtr());
+    auto ret = Pa_OpenStream(stream, inputParameters.get(), outputParameters.get(), sampleRate, framesPerBuffer, paNoFlag,
+                             grig_callback, audioInterface.GetPtr());
     pa_check_errors(ret, errors);
-    if (ret != 0) return;
+    if (ret != 0) return ret;
     ret = Pa_StartStream(*stream);
     pa_check_errors(ret, errors);
-    // std::cerr << inputPortVal.isNull() << " , " << outputPortVal.isNull() << std::endl;
+    return ret;
 }
