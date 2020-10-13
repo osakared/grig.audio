@@ -24,4 +24,44 @@ class AudioChannelTools
     {
         return sumOfSquares(channel) < sumOfSquaresThreshold;
     }
+
+    // /**
+    //     Adds `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
+    //     Values are summed.
+    // **/
+    // public inline function addInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
+    // {
+    //     var minLength = (channel.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (channel.length - sourceStart);
+    //     if (sourceStart < 0) sourceStart = 0;
+    //     if (sourceStart >= channel.length) return;
+    //     if (otherStart < 0) otherStart = 0;
+    //     if (length == null || length > minLength) {
+    //         length = minLength;
+    //     }
+    //     for (i in 0...length) {
+    //         other[otherStart + i] += channel[sourceStart + i];
+    //     }
+    // }
+
+    // /**
+    //     Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
+    //     Values in other are replaced with values from calling `AudioChannel`.
+    // **/
+    // public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
+    // {
+    //     var minLength = (channel.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (channel.length - sourceStart);
+    //     if (sourceStart < 0) sourceStart = 0;
+    //     if (sourceStart >= channel.length) return;
+    //     if (otherStart < 0) otherStart = 0;
+    //     if (length == null || length > minLength) {
+    //         length = minLength;
+    //     }
+    //     #if cpp
+    //     Vector.blit(channel, sourceStart, cast other, otherStart, length);
+    //     #else
+    //     for (i in 0...length) {
+    //         other[otherStart + i] = channel[sourceStart + i];
+    //     }
+    //     #end
+    // }
 }

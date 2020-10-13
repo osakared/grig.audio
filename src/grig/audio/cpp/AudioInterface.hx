@@ -3,7 +3,7 @@ package grig.audio.cpp; #if cpp
 import cpp.vm.Gc;
 import grig.audio.AudioBuffer;
 import grig.audio.ChannelsAudioBuffer;
-import grig.audio.ChannelsAudioChannel;
+import grig.audio.InterleavedAudioBuffer;
 import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
@@ -80,9 +80,16 @@ class AudioInterface
         if (options.bufferSize == null) options.bufferSize = 256;
         if (options.inputLatency == null) options.inputLatency = 0.01;
         if (options.outputLatency == null) options.outputLatency = 0.01;
+        if (options.interleaved == null) options.interleaved = true;
 
-        inputBuffer = ChannelsAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
-        outputBuffer = ChannelsAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+        if (options.interleaved) {
+            inputBuffer = InterleavedAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
+            outputBuffer = InterleavedAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+        }
+        else {
+            inputBuffer = ChannelsAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
+            outputBuffer = ChannelsAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+        }
     }
 
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>

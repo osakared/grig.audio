@@ -1,12 +1,13 @@
 #include "portaudio/portaudio/include/portaudio.h"
 
 #include <grig/audio/ChannelsAudioChannel.h>
+#include <grig/audio/InterleavedAudioChannel.h>
 #include <memory>
 #include <string>
 #include <vector>
 
 const int STRUCT_API_VERSION = 1;
-const PaSampleFormat SAMPLE_FORMAT = paFloat32 | paNonInterleaved;
+const PaSampleFormat SAMPLE_FORMAT = paFloat32;
 
 std::string haxe_string_to_std_string(String &str)
 {
@@ -136,6 +137,29 @@ int grig_callback(const void *input, void *output, unsigned long frameCount, con
     return 0;
 }
 
+int grig_callback_interleaved(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo,
+                  PaStreamCallbackFlags statusFlags, void *userData)
+{
+    int base = 0;
+    // Register thread to hxcpp's gc
+    hx::SetTopOfStack(&base, true);
+
+    auto audioInterface = (grig::audio::cpp::AudioInterface_obj*)userData;
+    auto inputChannels = (float*)input;
+    auto outputChannels = (float*)output;
+
+    auto inputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->inputBuffer;
+    auto outputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->outputBuffer;
+
+    inputBuffer->channels->setUnmanagedData(inputChannels, frameCount * inputBuffer->numChannels);
+    outputBuffer->channels->setUnmanagedData(outputChannels, frameCount * outputBuffer->numChannels);
+
+    audioInterface->callAudioCallback();
+
+    hx::SetTopOfStack((int*)0, true);
+    return 0;
+}
+
 void pa_check_errors(PaError err, ::Array<::String> errors)
 {
     if (err == 0) return;
@@ -151,10 +175,18 @@ int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface
     int numOutputChannels = options->__Field(HX_CSTRING("outputNumChannels"), HX_PROP_DYNAMIC).asInt();
     unsigned long framesPerBuffer = options->__Field(HX_CSTRING("bufferSize"), HX_PROP_DYNAMIC).asInt();
     double sampleRate = options->__Field(HX_CSTRING("sampleRate"), HX_PROP_DYNAMIC).asDouble();
+    bool interleaved = options->__Field(HX_CSTRING("interleaved"), HX_PROP_DYNAMIC).asInt();
+
+    PaSampleFormat sampleFormat = SAMPLE_FORMAT;
+    PaStreamCallback *callback = grig_callback_interleaved;
+    if (!interleaved) {
+        sampleFormat |= paNonInterleaved;
+        callback = grig_callback;
+    }
 
     if (inputPortVal.isNull() && outputPortVal.isNull()) {
-        auto ret = Pa_OpenDefaultStream(stream, numInputChannels, numOutputChannels, SAMPLE_FORMAT, sampleRate, framesPerBuffer,
-                                        grig_callback, audioInterface.GetPtr());
+        auto ret = Pa_OpenDefaultStream(stream, numInputChannels, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer,
+                                        callback, audioInterface.GetPtr());
         pa_check_errors(ret, errors);
         if (ret != 0) return ret;
         ret = Pa_StartStream(*stream);
@@ -167,7 +199,7 @@ int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface
         inputParameters.reset(new PaStreamParameters());
         inputParameters->device = inputPortVal.asInt();
         inputParameters->channelCount = numInputChannels;
-        inputParameters->sampleFormat = SAMPLE_FORMAT;
+        inputParameters->sampleFormat = sampleFormat;
         inputParameters->suggestedLatency = options->__Field(HX_CSTRING("inputLatency"), HX_PROP_DYNAMIC).asDouble();
         inputParameters->hostApiSpecificStreamInfo = nullptr;
     }
@@ -176,13 +208,13 @@ int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface
         outputParameters.reset(new PaStreamParameters());
         outputParameters->device = outputPortVal.asInt();
         outputParameters->channelCount = numOutputChannels;
-        outputParameters->sampleFormat = SAMPLE_FORMAT;
+        outputParameters->sampleFormat = sampleFormat;
         outputParameters->suggestedLatency = options->__Field(HX_CSTRING("outputLatency"), HX_PROP_DYNAMIC).asDouble();
         outputParameters->hostApiSpecificStreamInfo = nullptr;
     }
 
     auto ret = Pa_OpenStream(stream, inputParameters.get(), outputParameters.get(), sampleRate, framesPerBuffer, paNoFlag,
-                             grig_callback, audioInterface.GetPtr());
+                             callback, audioInterface.GetPtr());
     pa_check_errors(ret, errors);
     if (ret != 0) return ret;
     ret = Pa_StartStream(*stream);

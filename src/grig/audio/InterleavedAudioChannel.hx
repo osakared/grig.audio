@@ -3,35 +3,45 @@ package grig.audio;
 /**
     Represents a floating-point based signal
 **/
-class ChannelsAudioChannel implements AudioChannelImpl
+class InterleavedAudioChannel implements AudioChannelImpl
 {
-    private var channel:AudioChannelData;
+    private var channelData:AudioChannelData;
+    private var numChannels:Int;
+    private var channel:Int;
 
-    public function new(channel:AudioChannelData)
+    public function new(channelData:AudioChannelData, numChannels:Int, channel:Int)
     {
+        this.channelData = channelData;
+        this.numChannels = numChannels;
         this.channel = channel;
     }
 
     public inline function getLength():Int
     {
-        return channel.length;
+        return if (numChannels < 1) 0;
+        else Std.int(channelData.length / numChannels);
+    }
+
+    private inline function getInterleavedIndex(index:Int):Int
+    {
+        return index * numChannels + channel;
     }
 
     public inline function getSample(index:Int):AudioSample
     {
         #if cpp
-        return cpp.NativeArray.unsafeGet(cast channel, index);
+        return cpp.NativeArray.unsafeGet(cast channelData, getInterleavedIndex(index));
         #else
-        return channel[index];
+        return channelData[getInterleavedIndex(index)];
         #end
     }
 
     public inline function setSample(index:Int, sample:AudioSample):AudioSample
     {
         #if cpp
-        return cpp.NativeArray.unsafeSet(cast channel, index, sample);
+        return cpp.NativeArray.unsafeSet(cast channelData, getInterleavedIndex(index), sample);
         #else
-        return channel[index] = sample;
+        return channelData[getInterleavedIndex(index)] = sample;
         #end
     }
 
@@ -39,8 +49,8 @@ class ChannelsAudioChannel implements AudioChannelImpl
     public function applyGain(gain:Float)
     {
         // This is ripe for optimization...
-        for (i in 0...channel.length) {
-            channel[i] *= gain;
+        for (i in 0...channelData.length) {
+            channelData[i] *= gain;
         }
     }
 
@@ -55,18 +65,15 @@ class ChannelsAudioChannel implements AudioChannelImpl
     /** Set all values in the signal to `value` **/
     public function setAll(value:Float)
     {
-        for (i in 0...channel.length) {
-            channel[i] = value;
+        var len = getLength();
+        for (i in 0...len) {
+            channelData[getInterleavedIndex(i)] = value;
         }
     }
 
     /** Resets the buffer to silence (all `0.0`) **/
     public function clear()
     {
-        #if cpp
-        cpp.NativeArray.zero(cast channel, 0, channel.length);
-        #else
         setAll(0.0);
-        #end
     }
 }

@@ -10,4 +10,5 @@ typedef AudioInterfaceOptions =
     @:optional var bufferSize:Int;
     @:optional var inputLatency:Float;
     @:optional var outputLatency:Float;
+    @:optional var interleaved:Bool;
 }
