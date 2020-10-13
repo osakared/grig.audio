@@ -80,7 +80,7 @@ class AudioInterface
         if (options.bufferSize == null) options.bufferSize = 256;
         if (options.inputLatency == null) options.inputLatency = 0.01;
         if (options.outputLatency == null) options.outputLatency = 0.01;
-        if (options.interleaved == null) options.interleaved = true;
+        if (options.interleaved == null) options.interleaved = false;
 
         if (options.interleaved) {
             inputBuffer = InterleavedAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);

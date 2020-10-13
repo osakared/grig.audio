@@ -108,6 +108,18 @@ const std::vector<double> COMMON_SAMPLE_RATES = {8000, 11025, 16000, 22050, 4410
 
 #include <iostream>
 
+void fillStreamInfo(::grig::audio::AudioStreamInfo streamInfo, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags)
+{
+    streamInfo->inputUnderflow = statusFlags & paInputUnderflow != 0;
+    streamInfo->inputOverflow = statusFlags & paInputOverflow != 0;
+    streamInfo->outputUnderflow = statusFlags & paOutputUnderflow != 0;
+    streamInfo->outputOverflow = statusFlags & paOutputOverflow != 0;
+    streamInfo->primingOutput = statusFlags & paPrimingOutput != 0;
+    streamInfo->inputTime = timeInfo->inputBufferAdcTime;
+    streamInfo->outputTime = timeInfo->outputBufferDacTime;
+    streamInfo->callbackTime = timeInfo->currentTime;
+}
+
 int grig_callback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo,
                   PaStreamCallbackFlags statusFlags, void *userData)
 {
@@ -131,6 +143,8 @@ int grig_callback(const void *input, void *output, unsigned long frameCount, con
         channel->channel->setUnmanagedData(outputChannels[c], frameCount);
     }
 
+    fillStreamInfo(audioInterface->streamInfo, timeInfo, statusFlags);
+
     audioInterface->callAudioCallback();
 
     hx::SetTopOfStack((int*)0, true);
@@ -153,6 +167,8 @@ int grig_callback_interleaved(const void *input, void *output, unsigned long fra
 
     inputBuffer->channels->setUnmanagedData(inputChannels, frameCount * inputBuffer->numChannels);
     outputBuffer->channels->setUnmanagedData(outputChannels, frameCount * outputBuffer->numChannels);
+
+    fillStreamInfo(audioInterface->streamInfo, timeInfo, statusFlags);
 
     audioInterface->callAudioCallback();
 
