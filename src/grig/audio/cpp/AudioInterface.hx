@@ -21,7 +21,9 @@ extern class PortAudio
     @:native("get_port_infos")
     static public function getPortInfos(api:String):Array<PortInfo>;
     @:native("open_port")
-    static public function openPort(audioInterface:AudioInterface, options:AudioInterfaceOptions, stream:cpp.RawPointer<PAStream>, errors:Array<String>):Void;
+    static public function openPort(audioInterface:AudioInterface, options:AudioInterfaceOptions, stream:cpp.RawPointer<PAStream>, errors:Array<String>):Int;
+    @:native("close_port")
+    static public function closePort(stream:PAStream):Void;
 }
 
 @:build(grig.audio.cpp.Build.xml())
@@ -29,7 +31,7 @@ extern class PortAudio
 class AudioInterface
 {
     private var api:grig.audio.Api;
-    public var isOpen(default, null):Bool;
+    public var isOpen(default, null):Bool = false;
     private var audioCallback:AudioCallback = null;
     private var stream:PAStream;
     
@@ -96,16 +98,21 @@ class AudioInterface
     {
         var errors = new Array<String>();
         processOptions(options);
-        PortAudio.openPort(this, options, cpp.RawPointer.addressOf(stream), errors);
-        if (errors.length > 0) {
+        var ret = PortAudio.openPort(this, options, cpp.RawPointer.addressOf(stream), errors);
+        if (ret != 0 || errors.length > 0) {
             var errorString = errors.join('\n');
+            errors = [];
             return Future.sync(Failure(new Error(InternalError, 'Open port error: $errorString')));
         }
+        isOpen = true;
         return Future.sync(Success(this));
     }
 
     public function closePort():Void
     {
+        if (!isOpen) return;
+        PortAudio.closePort(stream);
+        isOpen = false;
     }
 
     public function setCallback(audioCallback:AudioCallback):Void

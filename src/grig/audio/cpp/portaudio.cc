@@ -237,3 +237,9 @@ int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface
     pa_check_errors(ret, errors);
     return ret;
 }
+
+void close_port(PaStream *stream)
+{
+    Pa_StopStream(stream);
+    Pa_CloseStream(stream);
+}
