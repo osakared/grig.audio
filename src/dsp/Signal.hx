@@ -1,6 +1,11 @@
+package dsp;
+
+/**
+	Signal processing miscellaneous utilities.
+**/
 class Signal {
 	/**
-		Finds indexes of peaks in the given value sequence.
+		Finds indexes of peaks in the order they appear in the input sequence.
 
 		@param threshold Minimal peak height (distance from neighbours), defaults to 0.
 	**/

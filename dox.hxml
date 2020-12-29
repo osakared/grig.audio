@@ -1,0 +1,13 @@
+--class-path src
+--macro include('dsp')
+
+-xml docs/dsp.xml
+
+-D doc-gen
+--no-output
+
+--next
+--cmd haxelib run dox -i docs -o docs --toplevel-package dsp --title "DSP Library - API Documentation" -D description "This is the API documentation for the DSP Library."
+
+--next
+--cmd rm docs/dsp.xml

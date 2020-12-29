@@ -1,12 +1,15 @@
-import Complex;
+package dsp;
+
+import dsp.Complex;
 
 // these are only used for testing, down in FFT.main()
 using Lambda;
-using OffsetArray;
-using Signal;
+using dsp.OffsetArray;
+using dsp.Signal;
+
 
 /**
-	Fast/Finite Fourier Transforms, whichever you prefer.
+	Fast/Finite Fourier Transforms.
 **/
 class FFT {
 	/**
@@ -17,16 +20,14 @@ class FFT {
 		samples from the Discrete-Time Fourier Transform (DTFT) - which is Fs-periodic -
 		with a spacing of Fs/N Hz between them and a scaling factor of Fs.
 	**/
-	public static function fft(input:Array<Complex>) : Array<Complex> {
+	public static function fft(input:Array<Complex>) : Array<Complex>
 		return do_fft(input, false);
-	}
 
 	/**
 		The same as `fft`, but for a real (Float) sequence input.
 	**/
-	public static function rfft(input:Array<Float>) : Array<Complex> {
+	public static function rfft(input:Array<Float>) : Array<Complex>
 		return fft(input.map(Complex.fromReal));
-	}
 
 	/**
 		Computes the Inverse DFT of a periodic input sequence.
@@ -35,9 +36,8 @@ class FFT {
 		from each other, the result will consist of N data points as sampled
 		from a time signal at intervals of 1/Fs with a scaling factor of 1/Fs.
 	**/
-	public static function ifft(input:Array<Complex>) : Array<Complex> {
+	public static function ifft(input:Array<Complex>) : Array<Complex>
 		return do_fft(input, true);
-	}
 
 	// Handles padding and scaling for forwards and inverse FFTs.
 	private static function do_fft(input:Array<Complex>, inverse:Bool) : Array<Complex> {
@@ -88,7 +88,7 @@ class FFT {
 	}
 
 	/**
-		Finds the power of 2 that is equal to or greater than given natural.
+		Finds the power of 2 that is equal to or greater than the given natural.
 	**/
 	static function nextPow2(x:Int) : Int {
 		if (x < 2) return 1;
@@ -99,14 +99,14 @@ class FFT {
 		return pow;
 	}
 
-	// Testing.
+	// testing, but also acts like an example
 	static function main() {
 		// sampling and buffer parameters
-		final Fs = 44100;
-		final N = 256;
+		final Fs = 44100.0;
+		final N = 512;
 		final halfN = Std.int(N / 2);
 
-		// build a time signal
+		// build a time signal as a sum of sinusoids
 		final freqs = [5919.911];
 		final ts = [for (n in 0...N) freqs.map(f -> Math.sin(2 * Math.PI * f * n / Fs))
 		                                  .fold((x, s) -> x + s, 0.0)];
