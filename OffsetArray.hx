@@ -1,14 +1,23 @@
 /**
-	A type that behaves like an array with an indexing offset.
+	A type that behaves like an Array with an indexing offset.
 **/
-@:forward(array)
+@:forward(array, offset)
 abstract OffsetArray<T>(OffsetArrayStruct<T>) {
 	/**
-		Make an OffsetArray view into the given Array, where indexes start
-		at the given offset.
+		Make an OffsetArray view into an `array`, where indexes start at the given `offset`.
 	**/
 	public inline function new(array:Array<T>, offset:Int) {
 		this = { array: array, offset: offset };
+	}
+
+	@:from
+	public static inline function fromArray<T>(array:Array<T>) {
+		return new OffsetArray(array, 0);
+	}
+
+	@:to
+	public inline function toArray() {
+		return this.array;
 	}
 
 	public var length(get,never) : Int;
@@ -36,8 +45,7 @@ abstract OffsetArray<T>(OffsetArrayStruct<T>) {
 		the left if negative) in circular fashion (no elements discarded).
 	**/
 	public static function circShift<T>(array:Array<T>, n:Int) : Array<T> {
-		if (n < 0)
-			return circShift(array, array.length + n);
+		if (n < 0) return circShift(array, array.length + n);
 
 		var shifted = new Array<T>();
 

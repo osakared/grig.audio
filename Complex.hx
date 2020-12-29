@@ -1,17 +1,3 @@
-class MathUtils {
-	/**
-		Finds the power of 2 that is equal to or greater than given natural.
-	**/
-	public static function nextPow2(x:Int) : Int {
-		if (x < 2) return 1;
-		else if ((x & (x-1)) == 0) return x;
-		var pow = 2;
-		x--;
-		while ((x >>= 1) != 0) pow <<= 1;
-		return pow;
-	}
-}
-
 @:forward(real, imag) @:notNull @:pure
 abstract Complex({
 	final real : Float;
@@ -19,6 +5,11 @@ abstract Complex({
 }) {
 	public inline function new(real:Float, imag: Float) {
 		this = { real: real, imag: imag };
+	}
+
+	@:from
+	public static inline function fromReal(r:Float) {
+		return new Complex(r, 0);
 	}
 
 	public var magnitude(get,never) : Float;
@@ -63,16 +54,17 @@ abstract Complex({
 	}
 
 	/**
-		The imaginary unit.
+		The imaginary unit "literal".
 	**/
 	public static final im = new Complex(0, 1);
 
-	public static inline function fromReal(r:Float) {
-		return new Complex(r, 0);
-	}
+	/**
+		Complex zero "literal".
+	**/
+	public static final zero = new Complex(0, 0);
 
 	/**
-		Complex exponential.
+		Computes the complex exponential `e^(iw)`.
 	**/
 	public static inline function exp(w:Float) {
 		return new Complex(Math.cos(w), Math.sin(w));

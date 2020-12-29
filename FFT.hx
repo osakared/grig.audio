@@ -1,19 +1,31 @@
-import MathUtils;
-using OffsetArrays;
-using Lambda;
+import Complex;
 
+// these are only used for testing, down in FFT.main()
+using Lambda;
+using OffsetArray;
+using Signal;
+
+/**
+	Fast/Finite Fourier Transforms, whichever you prefer.
+**/
 class FFT {
 	/**
-		Computes the Discrete Fourier Transform (DFT) of a finite sequence.
+		Computes the Discrete Fourier Transform (DFT) of a `Complex` sequence.
 
-		If the input has N data points (N should be a power of 2 or padding will
-		be added) from a signal sampled at intervals of 1/Fs, the result will be
-		a sequence of N samples from the Discrete-Time Fourier Transform (DTFT)
-		(which is Fs-periodic) with a spacing of Fs/N Hz between them and a
-		scaling factor of Fs.
+		If the input has N data points (N should be a power of 2 or padding will be added)
+		from a signal sampled at intervals of 1/Fs, the result will be a sequence of N
+		samples from the Discrete-Time Fourier Transform (DTFT) - which is Fs-periodic -
+		with a spacing of Fs/N Hz between them and a scaling factor of Fs.
 	**/
 	public static function fft(input:Array<Complex>) : Array<Complex> {
 		return do_fft(input, false);
+	}
+
+	/**
+		The same as `fft`, but for a real (Float) sequence input.
+	**/
+	public static function rfft(input:Array<Float>) : Array<Complex> {
+		return fft(input.map(Complex.fromReal));
 	}
 
 	/**
@@ -29,9 +41,9 @@ class FFT {
 
 	// Handles padding and scaling for forwards and inverse FFTs.
 	private static function do_fft(input:Array<Complex>, inverse:Bool) : Array<Complex> {
-		final n = MathUtils.nextPow2(input.length);
-		var ts = [for (i in 0...n) if (i < input.length) input[i] else new Complex(0,0)];
-		var fs = [for (_ in 0...n) new Complex(0,0)];
+		final n = nextPow2(input.length);
+		var ts = [for (i in 0...n) if (i < input.length) input[i] else Complex.zero];
+		var fs = [for (_ in 0...n) Complex.zero];
 		ditfft2(ts, 0, fs, 0, n, 1, inverse);
 		return inverse ? fs.map(z -> z.scale(1 / n)) : fs;
 		return fs;
@@ -66,7 +78,7 @@ class FFT {
 		var fs = new Array<Complex>();
 		fs.resize(n);
 		for (f in 0...n) {
-			var sum = new Complex(0, 0);
+			var sum = Complex.zero;
 			for (t in 0...n) {
 				sum += ts[t] * Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * f * t / n);
 			}
@@ -75,28 +87,54 @@ class FFT {
 		return fs;
 	}
 
-	public static function main() {
+	/**
+		Finds the power of 2 that is equal to or greater than given natural.
+	**/
+	static function nextPow2(x:Int) : Int {
+		if (x < 2) return 1;
+		else if ((x & (x-1)) == 0) return x;
+		var pow = 2;
+		x--;
+		while ((x >>= 1) != 0) pow <<= 1;
+		return pow;
+	}
+
+	// Testing.
+	static function main() {
 		// sampling and buffer parameters
 		final Fs = 44100;
 		final N = 256;
 		final halfN = Std.int(N / 2);
 
-		// time signal
-		final rs = [for (n in 0...N) Math.sin(2 * Math.PI * 5919.911e-0 * n / Fs)];
-		// final ts = [for (n in 0...N) n < 50 ? 1 : 0];
-		final ts = rs.map(Complex.fromReal);
+		// build a time signal
+		final freqs = [5919.911];
+		final ts = [for (n in 0...N) freqs.map(f -> Math.sin(2 * Math.PI * f * n / Fs))
+		                                  .fold((x, s) -> x + s, 0.0)];
 
-		// find spectrum and double-check with naive DFT for errors
-		final fs_fft = new OffsetArray(fft(ts).circShift(halfN), -halfN);
-		final fs_dft = new OffsetArray(dft(ts).circShift(halfN), -halfN);
+		// find spectrum and double-check with naive DFT
+		final fs_fft = new OffsetArray(rfft(ts).circShift(halfN), -halfN);
+		final fs_dft = new OffsetArray(dft(ts.map(Complex.fromReal)).circShift(halfN), -halfN);
 		final fs_err = [for (k in -halfN...halfN) fs_fft[k] - fs_dft[k]];
 		final max_fs_err = fs_err.map(z -> z.magnitude).fold(Math.max, 0);
 		if (max_fs_err > 1e-6) haxe.Log.trace('FT Error: ${max_fs_err}', null);
 		// else for (k => s in fs_fft) haxe.Log.trace('${k * Fs / N};${s.scale(1 / Fs).magnitude}', null);
 
-		// recover time signal from frequency domain
+		// find spectral peaks to detect signal frequencies
+		final freqis = fs_fft.array.map(z -> z.magnitude)
+		                           .findPeaks()
+		                           .map(k -> (k - halfN) * Fs / N)
+		                           .filter(f -> f >= 0);
+		if (freqis.length != freqs.length) {
+			trace('Found frequencies: ${freqis}');
+		} else {
+			final freqs_err = [for (i in 0...freqs.length) freqis[i] - freqs[i]];
+			final max_freqs_err = freqs_err.fold(Math.max, 0);
+			if (max_freqs_err > Fs / N) trace('Frequency Errors: ${freqs_err}');
+		}
+
+		// recover time signal from the frequency domain
 		final ts_ifft = ifft(fs_fft.array.circShift(-halfN).map(z -> z.scale(1 / Fs)));
-		final ts_err = [for (n in 0...N) ts_ifft[n].scale(Fs).real - ts[n].real];
+		final ts_err = [for (n in 0...N) ts_ifft[n].scale(Fs).real - ts[n]];
 		final max_ts_err = ts_err.map(Math.abs).fold(Math.max, 0);
 		if (max_ts_err > 1e-6) haxe.Log.trace('IFT Error: ${max_ts_err}', null);
 		// else for (n in 0...ts_ifft.length) haxe.Log.trace('${n / Fs};${ts_ifft[n].scale(Fs).real}', null);
