@@ -3,7 +3,6 @@ package dsp;
 import dsp.Complex;
 
 // these are only used for testing, down in FFT.main()
-using Lambda;
 using dsp.OffsetArray;
 using dsp.Signal;
 
@@ -24,10 +23,15 @@ class FFT {
 		return do_fft(input, false);
 
 	/**
-		The same as `fft`, but for a real (Float) sequence input.
+		Like `fft`, but for a real (Float) sequence input.
+
+		Since the input time signal is real, its frequency representation is
+		Hermitian-symmetric so we only return the positive frequencies.
 	**/
-	public static function rfft(input:Array<Float>) : Array<Complex>
-		return fft(input.map(Complex.fromReal));
+	public static function rfft(input:Array<Float>) : Array<Complex> {
+		final s = fft(input.map(Complex.fromReal));
+		return s.slice(0, Std.int(s.length / 2) + 1);
+	}
 
 	/**
 		Computes the Inverse DFT of a periodic input sequence.
@@ -108,34 +112,42 @@ class FFT {
 
 		// build a time signal as a sum of sinusoids
 		final freqs = [5919.911];
-		final ts = [for (n in 0...N) freqs.map(f -> Math.sin(2 * Math.PI * f * n / Fs))
-		                                  .fold((x, s) -> x + s, 0.0)];
+		final ts = [for (n in 0...N) freqs.map(f -> Math.sin(2 * Math.PI * f * n / Fs)).sum()];
 
-		// find spectrum and double-check with naive DFT
-		final fs_fft = new OffsetArray(rfft(ts).circShift(halfN), -halfN);
-		final fs_dft = new OffsetArray(dft(ts.map(Complex.fromReal)).circShift(halfN), -halfN);
-		final fs_err = [for (k in -halfN...halfN) fs_fft[k] - fs_dft[k]];
-		final max_fs_err = fs_err.map(z -> z.magnitude).fold(Math.max, 0);
+		// get positive spectrum and use its symmetry to reconstruct negative domain
+		final fs_pos = rfft(ts);
+		final fs_fft = new OffsetArray(
+			[for (k in -(halfN - 1) ... 0) fs_pos[-k].conj()].concat(fs_pos),
+			-(halfN - 1)
+		);
+
+		// double-check with naive DFT
+		final fs_dft = new OffsetArray(
+			dft(ts.map(Complex.fromReal)).circShift(halfN - 1),
+			-(halfN - 1)
+		);
+		final fs_err = [for (k in -(halfN - 1) ... halfN) fs_fft[k] - fs_dft[k]];
+		final max_fs_err = fs_err.map(z -> z.magnitude).max();
 		if (max_fs_err > 1e-6) haxe.Log.trace('FT Error: ${max_fs_err}', null);
 		// else for (k => s in fs_fft) haxe.Log.trace('${k * Fs / N};${s.scale(1 / Fs).magnitude}', null);
 
 		// find spectral peaks to detect signal frequencies
 		final freqis = fs_fft.array.map(z -> z.magnitude)
 		                           .findPeaks()
-		                           .map(k -> (k - halfN) * Fs / N)
+		                           .map(k -> (k - (halfN - 1)) * Fs / N)
 		                           .filter(f -> f >= 0);
 		if (freqis.length != freqs.length) {
 			trace('Found frequencies: ${freqis}');
 		} else {
 			final freqs_err = [for (i in 0...freqs.length) freqis[i] - freqs[i]];
-			final max_freqs_err = freqs_err.fold(Math.max, 0);
+			final max_freqs_err = freqs_err.map(Math.abs).max();
 			if (max_freqs_err > Fs / N) trace('Frequency Errors: ${freqs_err}');
 		}
 
 		// recover time signal from the frequency domain
-		final ts_ifft = ifft(fs_fft.array.circShift(-halfN).map(z -> z.scale(1 / Fs)));
+		final ts_ifft = ifft(fs_fft.array.circShift(-(halfN - 1)).map(z -> z.scale(1 / Fs)));
 		final ts_err = [for (n in 0...N) ts_ifft[n].scale(Fs).real - ts[n]];
-		final max_ts_err = ts_err.map(Math.abs).fold(Math.max, 0);
+		final max_ts_err = ts_err.map(Math.abs).max();
 		if (max_ts_err > 1e-6) haxe.Log.trace('IFT Error: ${max_ts_err}', null);
 		// else for (n in 0...ts_ifft.length) haxe.Log.trace('${n / Fs};${ts_ifft[n].scale(Fs).real}', null);
 	}

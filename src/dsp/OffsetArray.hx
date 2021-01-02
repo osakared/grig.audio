@@ -51,7 +51,7 @@ abstract OffsetArray<T>({
 
 		n = n % array.length;
 		for (i in array.length - n ... array.length) shifted.push(array[i]);
-		for (i in 0...n) shifted.push(array[i]);
+		for (i in 0 ... array.length - n) shifted.push(array[i]);
 
 		return shifted;
 	}
