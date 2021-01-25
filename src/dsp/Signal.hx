@@ -8,6 +8,25 @@ using Lambda;
 **/
 class Signal {
 	/**
+		Returns a smoothed version of the input array using a moving average.
+	**/
+	public static function smooth(y:Array<Float>, n:Int) : Array<Float> {
+		if (n <= 0) {
+			return null;
+		} else if (n == 1) {
+			return y.copy();
+		} else {
+			var smoothed = new Array<Float>();
+			smoothed.resize(y.length);
+			for (i in 0...y.length) {
+				var m = i + 1 < n ? i : n - 1;
+				smoothed[i] = sum(y.slice(i - m, i + 1));
+			}
+			return smoothed;
+		}
+	}
+
+	/**
 		Finds indexes of peaks in the order they appear in the input sequence.
 
 		@param threshold Minimal peak height wrt. its neighbours, defaults to 0.
@@ -59,9 +78,33 @@ class Signal {
 		return sum + c; // correction only applied at the very end
 	}
 
-	public static function max(array:Array<Float>) : Float
-		return array.fold(Math.max, array[0]);
+	/**
+		Returns the average value of an array.
+	**/
+	public static function mean(y:Array<Float>) : Float
+		return sum(y) / y.length;
 
-	public static function min(array:Array<Float>) : Float
-		return array.fold(Math.min, array[0]);
+	/**
+		Returns the global maximum.
+	**/
+	public static function max(y:Array<Float>) : Float
+		return y.fold(Math.max, y[0]);
+
+	/**
+		Returns the global maximum's index.
+	**/
+	public static function maxi(y:Array<Float>) : Int
+		return y.foldi((yi, m, i) -> yi > y[m] ? i : m, 0);
+
+	/**
+		Returns the global minimum.
+	**/
+	public static function min(y:Array<Float>) : Float
+		return y.fold(Math.min, y[0]);
+
+	/**
+		Returns the global minimum's index.
+	**/
+	public static function mini(y:Array<Float>) : Int
+		return y.foldi((yi, m, i) -> yi < y[m] ? i : m, 0);
 }

@@ -1,0 +1,10 @@
+# Converts MP3 to WAV, forcing mono output (and trimming track to first 7 secs)
+--cmd ffmpeg -hide_banner -loglevel warning -i res/track.mp3 -ss 00:00:00 -to 00:00:07 -y -ac 1 res/mono.wav
+--next
+
+# Run our main program and pipe output to a csv file
+--cmd haxe -cp src -lib format --resource res/mono.wav@res/track.wav -main Main -D analyzer-optimize --interp > res/plot.csv
+
+# Plot that file as a spectrogram
+--next
+--cmd gnuplot -p -e "set datafile separator ';'; set datafile missing '0'; set xlabel 'time (s)'; set ylabel 'frequency (Hz)'; set title 'Spectrogram'; unset colorbox; set pm3d map; splot 'res/plot.csv' using 1:2:3;"
