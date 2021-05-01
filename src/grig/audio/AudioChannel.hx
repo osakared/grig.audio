@@ -1,7 +1,7 @@
 package grig.audio;
 
 @:forward
-abstract AudioChannel(AudioChannelImpl)
+abstract AudioChannel(AudioChannelImpl) from AudioChannelImpl to AudioChannelImpl
 {
     public var length(get, never):Int;
 

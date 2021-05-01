@@ -65,13 +65,13 @@ class Main
                 options.inputNumChannels = port.maxInputChannels;
                 options.inputPort = port.portID;
                 options.sampleRate = port.defaultSampleRate;
-                options.inputLatency = port.defaultLowInputLatency;
+                options.inputLatency = port.defaultHighInputLatency;
             }
             if (port.isDefaultOutput) {
                 options.outputNumChannels = port.maxOutputChannels;
                 options.outputPort = port.portID;
                 options.sampleRate = port.defaultSampleRate; // if input and output are different samplerates (would that happen?) then this code will fail
-                options.outputLatency = port.defaultLowOutputLatency;
+                options.outputLatency = port.defaultHighOutputLatency;
             }
         }
         if (options.inputPort != null) audioInterface.setCallback(audioCallbackWithInput);

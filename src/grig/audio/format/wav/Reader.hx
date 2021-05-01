@@ -27,12 +27,12 @@ class Reader
                 var reader = new format.wav.Reader(input);
                 var wav = reader.read();
                 var lengthPerChannel:Int = Math.ceil(wav.data.length / wav.header.channels / (wav.header.bitsPerSample / 8));
-                var buffer = AudioBuffer.create(wav.header.channels, lengthPerChannel, wav.header.samplingRate);
+                var buffer = InterleavedAudioBuffer.create(wav.header.channels, lengthPerChannel, wav.header.samplingRate);
                 var bytesInput = new haxe.io.BytesInput(wav.data);
                 for (i in 0...lengthPerChannel) {
-                    for (c in 0...buffer.channels.length) {
+                    for (c in 0...buffer.numChannels) {
                         // Assuming integer file format here
-                        buffer.channels[c][i] = if (wav.header.bitsPerSample == 8) {
+                        buffer[c][i] = if (wav.header.bitsPerSample == 8) {
                             bytesInput.readByte() / 255.0;
                         } else if (wav.header.bitsPerSample == 16) {
                             bytesInput.readInt16() / 32767.0;

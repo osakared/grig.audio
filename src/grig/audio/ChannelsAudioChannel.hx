@@ -3,6 +3,7 @@ package grig.audio;
 /**
     Represents a floating-point based signal
 **/
+@:allow(grig.audio.AudioChannelTools)
 class ChannelsAudioChannel implements AudioChannelImpl
 {
     private var channel:AudioChannelData;
@@ -68,5 +69,13 @@ class ChannelsAudioChannel implements AudioChannelImpl
         #else
         setAll(0.0);
         #end
+    }
+
+    public function resample(ratio:Float, repitch:Bool = false):AudioChannel
+    {
+        var newNumSamples = Math.ceil(getLength() * ratio);
+        var newAudioChannel = new ChannelsAudioChannel(new AudioChannelData(newNumSamples));
+        LinearInterpolator.resampleIntoChannel(this, newAudioChannel, ratio);
+        return newAudioChannel;
     }
 }

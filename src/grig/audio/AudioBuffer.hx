@@ -1,7 +1,7 @@
 package grig.audio;
 
 @:forward
-abstract AudioBuffer(AudioBufferImpl)
+abstract AudioBuffer(AudioBufferImpl) from AudioBufferImpl to AudioBufferImpl
 {
     public var sampleRate(get, never):Float;
     public var numChannels(get, never):Int;
@@ -31,5 +31,10 @@ abstract AudioBuffer(AudioBufferImpl)
     public inline function get(i:Int):AudioChannel
     {
         return new AudioChannel(this.getChannel(i));
+    }
+
+    public inline function copyFrom(other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void
+    {
+        AudioBufferTools.copyFrom(this, other, length, otherStart, start);
     }
 }

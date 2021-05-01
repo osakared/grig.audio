@@ -11,4 +11,7 @@ interface AudioBufferImpl
 
     public function clear():Void;
     public function getChannel(i:Int):AudioChannelImpl;
+
+    /** Returns resampled version of this buffer **/
+    public function resample(ratio:Float, repitch:Bool = false):AudioBuffer;
 }

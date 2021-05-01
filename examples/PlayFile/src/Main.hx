@@ -1,5 +1,6 @@
 package;
 
+import grig.audio.Algorithm;
 import grig.audio.AudioBuffer;
 import grig.audio.AudioInterface;
 import grig.audio.LinearInterpolator;
@@ -16,13 +17,9 @@ class Main
         output.clear();
         if (buffer == null) return;
         if (location >= buffer.numSamples) return;
-        var numChannels = buffer.numSamples > output.numSamples ? output.numSamples : buffer.numSamples;
-        var samplesRemaining = buffer.numSamples - location;
-        var numSamples = samplesRemaining > output.numSamples ? output.numSamples : samplesRemaining;
-        for (c in 0...numChannels) {
-            buffer.getChannel(c).copyInto(output.getChannel(c), location, numSamples);
-        }
-        location += numSamples;
+        var length = Algorithm.min(buffer.numSamples - location, output.numSamples);
+        output.copyFrom(buffer, length, location, 0);
+        location += length;
     }
 
     private static function mainLoop(audioInterface:AudioInterface)

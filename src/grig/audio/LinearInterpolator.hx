@@ -1,7 +1,5 @@
 package grig.audio;
 
-import grig.audio.AudioChannel.AudioChannelData;
-
 class LinearInterpolator
 {
     /**
@@ -10,20 +8,33 @@ class LinearInterpolator
      * @param ratio ratio of output channel to input channel length
      * @return AudioChannel
      */
-    public static function resampleChannel(input:AudioChannel, ratio:Float):AudioChannel
-    {
-        var newNumSamples = Math.ceil(input.length * ratio);
-        var newAudioChannel = new AudioChannel(new AudioChannelData(newNumSamples));
-        resampleIntoChannel(input, newAudioChannel, ratio);
-        return newAudioChannel;
-    }
+    // public static function resampleChannel(input:AudioChannel, ratio:Float):AudioChannel
+    // {
+    //     var newNumSamples = Math.ceil(input.length * ratio);
+    //     var newAudioChannel = new AudioChannel(new AudioChannelData(newNumSamples));
+    //     resampleIntoChannel(input, newAudioChannel, ratio);
+    //     return newAudioChannel;
+    // }
+
+    // public static function resampleBuffer(input:AudioBuffer, ratio:Float, repitch:Bool = false):AudioBuffer
+    // {
+    //     var newNumSamples = Math.ceil(input.numSamples * ratio);
+    //     var sampleRate = repitch ? input.sampleRate : input.sampleRate * ratio;
+    //     var newBuffer = AudioBuffer.create(input.numChannels, newNumSamples, sampleRate);
+
+    //     for (c in 0...input.numChannels) {
+    //         resampleIntoChannel(input.channels[c], newBuffer.channels[c], ratio);
+    //     }
+
+    //     return newBuffer;
+    // }
 
     public static function resampleIntoChannel(input:AudioChannel, output:AudioChannel, ratio:Float):Void
     {
-        var newNumSamples = Math.ceil(input.length * ratio);
         if (ratio == 0.0) return;
+        var newNumSamples = Math.ceil(input.length * ratio);
 
-        newNumSamples = newNumSamples < output.length ? newNumSamples : output.length;
+        newNumSamples = Algorithm.min(newNumSamples, output.length);
         for (i in 0...newNumSamples) {
             var idx = i / ratio;
             var leftIdx = Math.floor(idx);

@@ -25,6 +25,20 @@ class AudioChannelTools
         return sumOfSquares(channel) < sumOfSquaresThreshold;
     }
 
+    public static function copyFrom(self:AudioChannel, other:AudioChannel, length:Int, otherStart:Int = 0, start:Int = 0):Void
+    {
+        #if cpp
+        if (Std.isOfType(self, ChannelsAudioChannel) && Std.isOfType(other, ChannelsAudioChannel)) {
+            cpp.NativeArray.blit(cast cast(self, ChannelsAudioChannel).channel, start,
+                                 cast cast(other, ChannelsAudioChannel).channel, otherStart, length);
+            return;
+        }
+        #end
+        for (i in 0...length) {
+            self[start + i] = other[otherStart + i];
+        }
+    }
+
     // /**
     //     Adds `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
     //     Values are summed.
