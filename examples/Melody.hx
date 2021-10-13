@@ -15,7 +15,7 @@ typedef Note = {
 	final amplitude : Float;
 }
 
-class Main {
+class Melody {
 	static function main() {
 		// read samples from audio data
 		final fileIn = "res/track.wav";
@@ -79,15 +79,14 @@ class Main {
 		while (c < samples.length) {
 			final freqs = stft(c);
 
-			// for (k => s in freqs) {
-			// 	haxe.Log.trace('${indexToTime(c)};${indexToFreq(k)};${s}', null);
-			// }
-			// haxe.Log.trace('', null);
+			// when piped to a CSV file, this can be printed as a spectrogram
+			for (k => s in freqs) {
+				haxe.Log.trace('${indexToTime(c)};${indexToFreq(k)};${s}', null);
+			}
+			haxe.Log.trace('', null);
 
 			final peaks = freqs.findPeaks();
 			final pi = peaks[peaks.map(i -> freqs[i]).maxi()];
-
-			// haxe.Log.trace('${indexToTime(c)};${indexToFreq(pi)}', null);
 
 			melody.push({ pitch: indexToFreq(pi), amplitude: freqs[pi] });
 			c += hop;

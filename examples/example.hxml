@@ -3,7 +3,7 @@
 --next
 
 # Run our main program and pipe output to a csv file
---cmd haxe -cp src -lib format --resource res/mono.wav@res/track.wav -main Main -D analyzer-optimize --interp > res/plot.csv
+--cmd haxe -cp examples -cp src -lib format --resource res/mono.wav@res/track.wav -main Melody -D analyzer-optimize --interp > res/plot.csv
 
 # Plot that file as a spectrogram
 --next

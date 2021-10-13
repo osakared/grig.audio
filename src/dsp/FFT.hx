@@ -129,7 +129,6 @@ class FFT {
 		final fs_err = [for (k in -(halfN - 1) ... halfN) fs_fft[k] - fs_dft[k]];
 		final max_fs_err = fs_err.map(z -> z.magnitude).max();
 		if (max_fs_err > 1e-6) haxe.Log.trace('FT Error: ${max_fs_err}', null);
-		// else for (k => s in fs_fft) haxe.Log.trace('${k * Fs / N};${s.scale(1 / Fs).magnitude}', null);
 
 		// find spectral peaks to detect signal frequencies
 		final freqis = fs_fft.array.map(z -> z.magnitude)
@@ -149,6 +148,5 @@ class FFT {
 		final ts_err = [for (n in 0...N) ts_ifft[n].scale(Fs).real - ts[n]];
 		final max_ts_err = ts_err.map(Math.abs).max();
 		if (max_ts_err > 1e-6) haxe.Log.trace('IFT Error: ${max_ts_err}', null);
-		// else for (n in 0...ts_ifft.length) haxe.Log.trace('${n / Fs};${ts_ifft[n].scale(Fs).real}', null);
 	}
 }
