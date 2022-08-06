@@ -1,10 +1,10 @@
 package;
 
-import grig.audio.Algorithm;
 import grig.audio.AudioBuffer;
 import grig.audio.AudioInterface;
 import grig.audio.LinearInterpolator;
 import haxe.Timer;
+import thx.Ints;
 import tink.core.Future;
 
 class Main
@@ -17,7 +17,7 @@ class Main
         output.clear();
         if (buffer == null) return;
         if (location >= buffer.numSamples) return;
-        var length = Algorithm.min(buffer.numSamples - location, output.numSamples);
+        var length = Ints.min(buffer.numSamples - location, output.numSamples);
         output.copyFrom(buffer, length, location, 0);
         location += length;
     }

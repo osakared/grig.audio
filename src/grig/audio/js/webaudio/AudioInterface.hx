@@ -47,7 +47,8 @@ class AudioInterface
         streamInfo.inputTime = new AudioTime(currentTime);
         streamInfo.outputTime = new AudioTime(event.playbackTime);
         streamInfo.callbackTime = new AudioTime(currentTime);
-        audioCallback(new AudioBuffer(event.inputBuffer), new AudioBuffer(event.outputBuffer), event.outputBuffer.sampleRate, streamInfo);
+        var inputBuffer:grig.audio.AudioBuffer = new AudioBuffer(event.inputBuffer);
+        audioCallback(inputBuffer, new AudioBuffer(event.outputBuffer), event.outputBuffer.sampleRate, streamInfo);
     }
 
     private function instantiateContext():Void

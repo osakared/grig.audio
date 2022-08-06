@@ -1,5 +1,7 @@
 package grig.audio;
 
+import thx.Ints;
+
 class AudioBufferTools
 {
     public static function copyFrom(self:AudioBuffer, other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void
@@ -12,7 +14,7 @@ class AudioBufferTools
             return;
         }
         #end
-        var channelsToCopy = Algorithm.min(self.numChannels, other.numChannels);
+        var channelsToCopy = Ints.min(self.numChannels, other.numChannels);
         for (c in 0...channelsToCopy) {
             AudioChannelTools.copyFrom(self[c], other[c], length, otherStart, start);
         }

@@ -1,5 +1,7 @@
 package grig.audio;
 
+import thx.Ints;
+
 class LinearInterpolator
 {
     /**
@@ -34,7 +36,7 @@ class LinearInterpolator
         if (ratio == 0.0) return;
         var newNumSamples = Math.ceil(input.length * ratio);
 
-        newNumSamples = Algorithm.min(newNumSamples, output.length);
+        newNumSamples = Ints.min(newNumSamples, output.length);
         for (i in 0...newNumSamples) {
             var idx = i / ratio;
             var leftIdx = Math.floor(idx);

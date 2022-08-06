@@ -63,15 +63,15 @@ class ChannelsAudioBuffer implements AudioBufferImpl
         #end
     }
 
-    // public function resample(ratio:Float, repitch:Bool = false)
-    // {
-    //     var newChannels = new Array<AudioChannel>();
-    //     if (ratio == 0) return new AudioBuffer(newChannels, 44100.0);
-    //     for (channel in channels) {
-    //         newChannels.push(LinearInterpolator.resampleChannel(channel, ratio));
-    //     }
-    //     return new AudioBuffer(newChannels, repitch ? sampleRate : sampleRate * ratio);
-    // }
+    public function resample(ratio:Float, repitch:Bool = false)
+    {
+        var newChannels = new Array<AudioChannel>();
+        if (ratio == 0) return new AudioBuffer(newChannels, 44100.0);
+        for (channel in channels) {
+            newChannels.push(LinearInterpolator.resampleChannel(channel, ratio));
+        }
+        return new AudioBuffer(newChannels, repitch ? sampleRate : sampleRate * ratio);
+    }
 
     // public function copyInto(other:AudioBuffer, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
     // {
