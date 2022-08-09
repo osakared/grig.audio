@@ -2,5 +2,6 @@
 -cp ../../src
 -dce no
 -lib tink_core
+-lib thx.core
 -main Main
 # -js bin/Sine.js
