@@ -7,16 +7,29 @@ import haxe.macro.Type;
 class Macro
 {
     // Disable this stuff in Windows probably
+    // and put in a separate class...
     private static inline var bold = '\033[1m';
     private static inline var cyan = '\033[36m';
+    private static inline var red = '\033[31m';
+    private static inline var brown = '\033[33m';
     private static inline var reset = '\033[0m';
 
     public static inline var marquee = 'hxal:';
 
     #if macro
-    private static function info(message:String):Void
+    public static function info(message:String, position:Position):Void
     {
-        Context.info('${cyan}${bold}${marquee}${reset} ${cyan}${message}${reset}', Context.currentPos());
+        Context.info('${cyan}${bold}${marquee}${reset} ${cyan}${message}${reset}', position);
+    }
+
+    public static function error(message:String, position:Position):Void
+    {
+        Context.error('${cyan}${bold}${marquee}${reset} ${red}${message}${reset}', position);
+    }
+
+    public static function warning(message:String, position:Position):Void
+    {
+        Context.warning('${cyan}${bold}${marquee}${reset} ${brown}${message}${reset}', position);
     }
  
     private static function init():ClassType
@@ -29,7 +42,7 @@ class Macro
         var localClass = localClassRef.get();
 
         // var descriptor = NodeDescriptor.fromClassType(localClass.get());
-        info('🧚‍♂️ Initializing hxal compiler for class ${localClass.name}...');
+        info('🧚‍♂️ Initializing hxal compiler for class ${localClass.name}...', localClass.pos);
 
         return localClass;
     }
@@ -37,8 +50,7 @@ class Macro
     public static function buildProcessor():Array<haxe.macro.Field>
     {
         var localClass = init();
-
-        
+        var descriptor = new ClassDescriptor(localClass);
 
         return [];
     }
