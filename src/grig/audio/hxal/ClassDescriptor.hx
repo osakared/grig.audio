@@ -13,7 +13,7 @@ class ClassDescriptor
 {
     public var className:String;
     public var vars = new Array<HVar>();
-    private static inline var metaPrefix = ':hxal_';
+    private static inline var metaPrefix = ':hxal.';
 
     private function setupPredefineds():Void
     {

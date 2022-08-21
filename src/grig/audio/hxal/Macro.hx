@@ -16,6 +16,8 @@ class Macro
 
     public static inline var marquee = 'hxal:';
 
+    private static var environment = "haxe";
+
     #if macro
     public static function info(message:String, position:Position):Void
     {
@@ -32,7 +34,21 @@ class Macro
         Context.warning('${cyan}${bold}${marquee}${reset} ${brown}${message}${reset}', position);
     }
  
-    private static function init():ClassType
+    private static function init(classType:ClassType):Void
+    {
+        info('🧚‍♂️ Initializing hxal compiler for class ${classType.name} and environment ${environment}...',
+            classType.pos);
+    }
+
+    public static function buildProcessor(classType:ClassType):Array<haxe.macro.Field>
+    {
+        init(classType);
+        var descriptor = new ClassDescriptor(classType);
+
+        return [];
+    }
+
+    public static function autoBuildProcessor():Array<haxe.macro.Field>
     {
         var localClassRef:Null<Ref<ClassType>> = Context.getLocalClass();
         if (localClassRef == null) {
@@ -40,19 +56,25 @@ class Macro
         }
 
         var localClass = localClassRef.get();
+        var fields = buildProcessor(localClass);
 
-        // var descriptor = NodeDescriptor.fromClassType(localClass.get());
-        info('🧚‍♂️ Initializing hxal compiler for class ${localClass.name}...', localClass.pos);
+        // Add a static main field so we can use the --run trick to force macro to run
+        fields.push({
+            name: 'main',
+            access: [AStatic, APublic],
+            kind: FFun({
+                args: [],
+                expr: macro {}
+            }),
+            pos: localClass.pos
+        });
 
-        return localClass;
+        return fields;
     }
 
-    public static function buildProcessor():Array<haxe.macro.Field>
+    public static function setEnvironment(environmentName:String):Void
     {
-        var localClass = init();
-        var descriptor = new ClassDescriptor(localClass);
-
-        return [];
+        environment = environmentName;
     }
     #end
 }
