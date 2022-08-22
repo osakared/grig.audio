@@ -3,6 +3,6 @@
 -dce no
 -lib tink_core
 -lib thx.core
--lib hscript_template
+-lib hscript-template
 --macro grig.audio.hxal.Macro.setEnvironment("cpp")
 --run SineProcessor

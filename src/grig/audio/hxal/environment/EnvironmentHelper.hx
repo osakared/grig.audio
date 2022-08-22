@@ -15,7 +15,6 @@ class EnvironmentHelper
     }
 
     public function print(vars: {}):String {
-        var interp = new Interp();
-        return interp.execute(new Parser().parse(templateData), vars);
+        return Interp.buildFromString(templateData, vars);
     }
 }
