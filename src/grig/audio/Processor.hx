@@ -1,6 +1,6 @@
 package grig.audio;
 
-@:autoBuild(grig.audio.hxal.Macro.autoBuildProcessor())
+@:autoBuild(grig.audio.hxal.Macro.buildProcessor())
 interface Processor
 {
 }

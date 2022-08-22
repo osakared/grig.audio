@@ -5,7 +5,7 @@ import haxe.macro.Expr;
 enum VarType
 {
     TFloat;
-    Invalid;
+    TInvalid;
 }
 
 enum DefinedLocation
@@ -14,13 +14,8 @@ enum DefinedLocation
     Defined(position:Position);
 }
 
-class HVar
-{
-    public var name:String;
-    public var type:VarType;
-    public var definedLocation:DefinedLocation;
-
-    public function new()
-    {
-    }
+typedef HVar = {
+    var name:String;
+    var type:VarType;
+    var definedLocation:DefinedLocation;
 }

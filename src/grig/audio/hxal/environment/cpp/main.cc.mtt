@@ -1,0 +1,9 @@
+
+class :: className ::
+{
+    private:
+    ::for (hvar in vars)::
+    :: hvar.type :: :: hvar.name ::;
+    ::end::
+    public:
+};

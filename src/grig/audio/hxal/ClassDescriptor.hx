@@ -48,7 +48,7 @@ class ClassDescriptor
                 TFloat;
             default:
                 Macro.error('Not implemented type: ${name}', position);
-                Invalid;
+                TInvalid;
         }
     }
 
@@ -59,7 +59,7 @@ class ClassDescriptor
                 getTypeFromTypePath(typePath, position);
             default:
                 Macro.error('Not implemented complex type', position);
-                Invalid;
+                TInvalid;
         }
     }
 
@@ -77,12 +77,11 @@ class ClassDescriptor
 
             switch (field.kind) {
                 case FVar(complexType, expr):
-                    var nodeVar = new HVar();
                     if (complexType == null) {
                         Macro.error("Unspecified type in declaration not supported", field.pos);
                     }
-                    nodeVar.name = field.name;
-                    nodeVar.type = getType(complexType, field.pos);
+                    var name = field.name;
+                    var type = getType(complexType, field.pos);
                     // nodeVar.expr = expr;
                     // verifySupportedVarAccess(nodeVar, field.access);
                     for (meta in field.meta) {
@@ -94,7 +93,7 @@ class ClassDescriptor
                                 Macro.warning('hxal macro "${hMeta}" not defined', field.pos);
                         }
                     }
-                    vars.push(nodeVar);
+                    vars.push({name: name, type: type, definedLocation: Defined(field.pos)});
                 case FFun(fun):
                     trace('fun');
                 case FProp(_, _):
