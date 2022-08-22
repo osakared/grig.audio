@@ -1,7 +1,7 @@
 package grig.audio.hxal.environment;
 
+import ftk.format.template.Interp;
 import ftk.format.template.Parser;
-import ftk.format.template.Template;
 import haxe.macro.Context;
 import sys.io.File;
 
@@ -15,7 +15,7 @@ class EnvironmentHelper
     }
 
     public function print(vars: {}):String {
-        var template = new Template();
-        return template.execute(new Parser().parse(templateData), vars);
+        var interp = new Interp();
+        return interp.execute(new Parser().parse(templateData), vars);
     }
 }

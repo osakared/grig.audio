@@ -4,6 +4,5 @@
 -lib tink_core
 -lib thx.core
 -lib hscript_template
--D hscript_in_macro
 --macro grig.audio.hxal.Macro.setEnvironment("cpp")
 --run SineProcessor
