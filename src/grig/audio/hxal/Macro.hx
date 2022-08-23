@@ -56,7 +56,10 @@ class Macro
 
         // Do sth else if environment == 'haxe'
         var environment = getEnvironment(environmentNameSetting);
-        environment.buildOutput(descriptor);
+        var cwd = Sys.getCwd();
+        var outPath = Context.definedValue('hxalOut');
+        if (outPath == null || outPath == '1') outPath = 'out';
+        environment.buildOutput(descriptor, cwd + outPath);
 
         var fields = new Array<haxe.macro.Field>();
         // Add a static main field so we can use the --run trick to force macro to run

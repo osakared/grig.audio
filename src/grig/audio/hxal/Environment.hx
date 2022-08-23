@@ -5,5 +5,5 @@ package grig.audio.hxal;
 **/
 interface Environment
 {
-    public function buildOutput(descriptor:ClassDescriptor):Void;
+    public function buildOutput(descriptor:ClassDescriptor, outPath:String):Void;
 }

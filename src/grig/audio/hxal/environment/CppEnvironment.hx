@@ -1,6 +1,9 @@
 package grig.audio.hxal.environment;
 
 import grig.audio.hxal.HVar;
+import haxe.DynamicAccess;
+import haxe.macro.Context;
+import sys.io.File;
 
 class CppEnvironment implements grig.audio.hxal.Environment
 {
@@ -9,17 +12,20 @@ class CppEnvironment implements grig.audio.hxal.Environment
     public function new() {
     }
 
-    public function buildOutput(descriptor:ClassDescriptor):Void {
-        var helper = new EnvironmentHelper('cpp/main.cc.mtt');
-        trace(helper.print({
-            className: descriptor.className,
-            vars: [for (hvar in descriptor.vars) {name: hvar.name, type: cppTypeFromVarType(hvar.type)}]
-        }));
+    public function buildOutput(descriptor:ClassDescriptor, outPath:String):Void {
+        var ereg = new EReg('\\.\\w+$', '');
+        if (!ereg.match(outPath)) outPath += '.cpp';
+        grig.audio.hxal.Macro.info('Outputting to path: ${outPath}', Context.currentPos());
+        var helper = new EnvironmentHelper();
+        var vars = new DynamicAccess<Dynamic>();
+        vars['descriptor'] = descriptor;
+        vars['CppEnvironment'] = CppEnvironment;
+        File.saveContent(outPath, helper.print('cpp/main.cc.mtt', vars));
     }
 
-    private static function cppTypeFromVarType(varType:VarType):String {
+    public static function cppTypeFromVarType(varType:VarType):String {
         return switch varType {
-            case TFloat: 'float';
+            case TFloat: 'std::atomic<float>';
             case TInvalid: 'NaN';
         }
     }
