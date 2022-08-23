@@ -15,15 +15,13 @@ class ClassDescriptor
     public var vars = new Array<HVar>();
     private static inline var metaPrefix = ':hxal.';
 
-    private function setupPredefineds():Void
-    {
+    private function setupPredefineds():Void {
         // vars.push(new HVar('sin', TFunction, BuiltIn));
     }
 
     // tries to resolve variable from beginning of array to last, so for masking to work
     // right, ensure that higher scopes come /later/
-    static private function findVarInScope(varScopes:Array<Array<HVar>>, name:String):Option<HVar>
-    {
+    static private function findVarInScope(varScopes:Array<Array<HVar>>, name:String):Option<HVar> {
         for (vars in varScopes) {
             for (hvar in vars) {
                 if (hvar.name == name) return Some(hvar);
@@ -32,28 +30,28 @@ class ClassDescriptor
         return None;
     }
 
-    private static function checkNoParams(typePath:TypePath, position:Position):Void
-    {
+    private static function checkNoParams(typePath:TypePath, position:Position):Void {
         if (typePath.params != null && typePath.params.length != 0) {
             Macro.error('Type: ${typePath.name} does not allow parameters', position);
         }
     }
 
-    private static function getTypeFromTypePath(typePath:TypePath, position:Position):VarType
-    {
+    private static function getTypeFromTypePath(typePath:TypePath, position:Position):VarType {
         var name = typePath.name;
         return switch name {
             case 'Float':
                 checkNoParams(typePath, position);
                 TFloat;
+            case 'AtomicFloat':
+                checkNoParams(typePath, position);
+                TAtomicFloat;
             default:
                 Macro.error('Not implemented type: ${name}', position);
                 TInvalid;
         }
     }
 
-    public static function getType(complexType:ComplexType, position:Position):VarType
-    {
+    public static function getType(complexType:ComplexType, position:Position):VarType {
         return switch complexType {
             case TPath(typePath):
                 getTypeFromTypePath(typePath, position);
@@ -63,8 +61,7 @@ class ClassDescriptor
         }
     }
 
-    public function new(classType:ClassType)
-    {
+    public function new(classType:ClassType) {
         className = classType.name;
 
         setupPredefineds();
@@ -100,5 +97,15 @@ class ClassDescriptor
                     Macro.error("Properties not supported", field.pos);
             }
         }
+    }
+
+    public function getUsedAtomicTypes():Array<VarType> {
+        var usedAtomicTypes = new Array<VarType>();
+        for (hvar in vars) {
+            if (HVarTools.isAtomic(hvar.type) && !usedAtomicTypes.contains(hvar.type)) {
+                usedAtomicTypes.push(hvar.type);
+            }
+        }
+        return usedAtomicTypes;
     }
 }

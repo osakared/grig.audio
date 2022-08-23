@@ -5,6 +5,7 @@ import haxe.macro.Expr;
 enum VarType
 {
     TFloat;
+    TAtomicFloat;
     TInvalid;
 }
 

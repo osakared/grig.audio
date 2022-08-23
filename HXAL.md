@@ -1,12 +1,19 @@
 # HXAL
 
-Hxal is an audio-oriented DSL (domain specific programming language) that will be increasingly used by grig.audio to facilitate clean real-time audio code. It solves a number of problems that, in my opinion, prevent pre-hxal grig.audio from being usable for real-time audio code. It is in an early stage, but the current focus is on bare minimum but working before we start adding \[carefully thought-out\] features.
+Hxal is an audio-oriented DSL (domain specific programming language) that will be increasingly used by grig.audio to facilitate clean real-time audio code. It solves a number of problems that prevent pre-hxal grig.audio from being usable for real-time audio code. It is in an early stage, but the current focus is on bare minimum but working before we start adding \[carefully thought-out\] features.
 
 ## Basic Philosophy of HXAL
 
 A simple DSL for making real-time audio code. It's not meant to be a way to write entire applications, but can be away to make synthesizers, effects, and audio code within larger applications. GUIs, midi and OSC code, music theory stuff, etc. all can be done in plain haxe just fine. It doesn't try to be clever and mathematically perfect but instead practical and more closely resemble most rt audio code in the real world - code that works on block-based callbacks. Importantly, it is syntactically haxe code and should make sense to haxe and c++ developers. One of the first features will be to allow environment-specific inline code so that you can port c++ code right away and move things into hxal when you want to take advantage of non-c++ environments.
 
 It's meant to *get out of the way*, *not be fancy* and, like the haxe language itself, *take advantage of hard work that others already did*. It might not provide as much capabilities out of the box as other things, but it should be relatively easy to port existing code to. It won't start out with every imaginable optimization but it should generate standard-compliant code that compilers can optimize and provide a framework for future hand-optimization.
+
+- When in doubt, don't allow it
+- Fewer features, done right
+- If it's a bad idea to do something 95% of the time, don't allow it
+- Whatever you can't do in hxal you can do in embedded environment-specific code if you must
+- Enforce good audio coding practices
+- Guarantees of thread safety (for getters/setters), lock-free atomics, etc. take precedence over the haxian guarantee that the transpiler should catch the problem. Sometimes C++/C/Rust has to catch the problem because we don't always know where the code is going anyway (e.g., compiled for embedded processor).
 
 ## Problems we need this early version of hxal to fix:
 

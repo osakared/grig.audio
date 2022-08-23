@@ -1,4 +1,4 @@
 #include <atomic>
-$$for (varType in environment.HVarTools.getAtomicTypes())$$
-static_assert($$environment.CppEnvironment.cppTypeFromVarType(varType)$$::is_always_lock_free, "hxal type $$varType$$ not atomic");
+$$for (varType in environment.descriptor.getUsedAtomicTypes())$$
+static_assert($$environment.CppEnvironment.cppTypeFromVarType(varType)$$::is_always_lock_free, "hxal type $$environment.HVarTools.getHxalNameForType(varType)$$ not atomic");
 $$end$$

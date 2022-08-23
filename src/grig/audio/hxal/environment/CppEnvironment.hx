@@ -25,7 +25,8 @@ class CppEnvironment implements grig.audio.hxal.Environment
 
     public static function cppTypeFromVarType(varType:VarType):String {
         return switch varType {
-            case TFloat: 'std::atomic<float>';
+            case TFloat: 'float';
+            case TAtomicFloat: 'std::atomic<float>';
             case TInvalid: 'NaN';
         }
     }

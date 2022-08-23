@@ -3,6 +3,7 @@ package;
 class SineProcessor implements grig.audio.Processor
 {
     private var phase:Float;
+    private var pitch:AtomicFloat;
     
     // @hxal.midi.note 
     // private var gate:Bool;
