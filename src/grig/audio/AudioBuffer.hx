@@ -12,8 +12,4 @@ abstract AudioBuffer<T:Float>(AudioBufferData<T>) from AudioBufferData<T> to Aud
     public inline function get(i:Int):AudioChannel<T> {
         return this.get(i);
     }
-
-    // public inline function copyFrom(other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void {
-    //     AudioBufferTools.copyFrom(this, other, length, otherStart, start);
-    // }
 }

@@ -31,8 +31,4 @@ class AudioBufferData<T:Float>
         return channels[i];
         #end
     }
-
-    // public inline function copyFrom(other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void {
-    //     AudioBufferTools.copyFrom(this, other, length, otherStart, start);
-    // }
 }

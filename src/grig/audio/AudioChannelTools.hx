@@ -27,6 +27,10 @@ class AudioChannelTools
         return sumOfSquares(input) < sumOfSquaresThreshold;
     }
 
+    /**
+        Copies from `other` into `self`
+        warning: does no bounds checking!
+    **/
     @:generic
     public static function copyFrom<T:Float>(self:AudioChannel<T>, other:AudioChannel<T>, length:Int,
                                              otherStart:Int = 0, start:Int = 0):Void
@@ -40,6 +44,10 @@ class AudioChannelTools
         }
     }
 
+    /**
+        Adds from `other` into `self`
+        warning: does no bounds checking!
+    **/
     @:generic
     public static function addFrom<T:Float>(self:AudioChannel<T>, other:AudioChannel<T>, length:Int,
                                              otherStart:Int = 0, start:Int = 0):Void
@@ -52,7 +60,7 @@ class AudioChannelTools
 
     /** Returns a resampled version of the channel **/
     @:generic
-    public function resample<T:Float>(input:AudioChannel<T>, ratio:Float):AudioChannel<T> {
+    public static function resample<T:Float>(input:AudioChannel<T>, ratio:Float):AudioChannel<T> {
         var newNumSamples = Math.ceil(input.length * ratio);
         var newAudioChannel = new AudioChannel<T>(newNumSamples);
         var interpolator = new LinearInterpolator<T>();
@@ -60,43 +68,30 @@ class AudioChannelTools
         return newAudioChannel;
     }
 
-    // /**
-    //     Adds `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
-    //     Values are summed.
-    // **/
-    // public inline function addInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
-    // {
-    //     var minLength = (channel.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (channel.length - sourceStart);
-    //     if (sourceStart < 0) sourceStart = 0;
-    //     if (sourceStart >= channel.length) return;
-    //     if (otherStart < 0) otherStart = 0;
-    //     if (length == null || length > minLength) {
-    //         length = minLength;
-    //     }
-    //     for (i in 0...length) {
-    //         other[otherStart + i] += channel[sourceStart + i];
-    //     }
-    // }
+    /** Set all values in the signal to `value` **/
+    @:generic
+    public static function setAll<T:Float>(input:AudioChannel<T>, value:T) {
+        for (i in 0...input.length) {
+            input[i] = value;
+        }
+    }
 
-    // /**
-    //     Copes `length` values from calling `AudioChannel` starting at `sourceStart` into `other`, starting at `sourceStart`.
-    //     Values in other are replaced with values from calling `AudioChannel`.
-    // **/
-    // public function copyInto(other:AudioChannel, sourceStart:Int = 0, length:Null<Int> = null, otherStart:Int = 0)
-    // {
-    //     var minLength = (channel.length - sourceStart) > (other.length - otherStart) ? (other.length - otherStart) : (channel.length - sourceStart);
-    //     if (sourceStart < 0) sourceStart = 0;
-    //     if (sourceStart >= channel.length) return;
-    //     if (otherStart < 0) otherStart = 0;
-    //     if (length == null || length > minLength) {
-    //         length = minLength;
-    //     }
-    //     #if cpp
-    //     Vector.blit(channel, sourceStart, cast other, otherStart, length);
-    //     #else
-    //     for (i in 0...length) {
-    //         other[otherStart + i] = channel[sourceStart + i];
-    //     }
-    //     #end
-    // }
+    /** Resets the buffer to silence (all `0.0`) **/
+    @:generic
+    public static function clear<T:Float>(input:AudioChannel<T>) {
+        #if cpp
+        cpp.NativeArray.zero(cast input, 0, input.length);
+        #else
+        setAll(input, 0);
+        #end
+    }
+
+    /** Multiply all values in the signal by gain **/
+    @:generic
+    public static function applyGain<T:Float>(input:AudioChannel<T>, gain:Float) {
+        // This is ripe for optimization...
+        for (i in 0...input.length) {
+            input[i] = cast input[i] * gain;
+        }
+    }
 }

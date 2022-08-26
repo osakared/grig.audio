@@ -28,20 +28,4 @@ abstract AudioChannel<T:Float>(Vector<T>) from Vector<T> to Vector<T>
         return this[index] = sample;
         #end
     }
-
-    /** Set all values in the signal to `value` **/
-    public function setAll(value:T) {
-        for (i in 0...this.length) {
-            this[i] = value;
-        }
-    }
-
-    /** Resets the buffer to silence (all `0.0`) **/
-    public function clear() {
-        #if cpp
-        cpp.NativeArray.zero(cast this, 0, this.length);
-        #else
-        this.setAll(0);
-        #end
-    }
 }

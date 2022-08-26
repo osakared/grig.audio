@@ -2,6 +2,7 @@ package;
 
 import grig.audio.AudioBuffer;
 import grig.audio.AudioChannel;
+import grig.audio.InterleavedAudioBuffer;
 import grig.audio.LinearInterpolator;
 import grig.audio.NumericTypes;
 import tink.unit.Assert.*;
@@ -41,6 +42,17 @@ class AudioChannelTest {
         var resampledBuffer2 = buffer.resample(0.5);
 
         return assert(resampledBuffer1[0][1] == 0.5 && resampledBuffer2[0][1] == 2);
+    }
+
+    public function testInterleaved()
+    {
+        var buffer = new InterleavedAudioBuffer<Float64>(2, 10, 48000.0);
+        for (i in 0...buffer.numSamples) {
+            buffer[0][i] = 0;
+            buffer[1][i] = i;
+        }
+
+        return assert(buffer[0][5] == 0.0);
     }
 
 }
