@@ -5,7 +5,8 @@ class AudioChannelTools
     static private var sumOfSquaresThreshold:Float = 0.1;
 
     /** Sum of squares of the data. A quick and dirty way to check energy level **/
-    public static function sumOfSquares(channel:AudioChannel):Float
+    @:generic
+    public static function sumOfSquares<T:Float>(channel:AudioChannel<T>):Float
     {
         var sum:Float = 0.0;
         for (i in 0...channel.length) {
@@ -20,23 +21,43 @@ class AudioChannelTools
     }
 
     /** Uses sum of squares to determine sufficiently low energy **/
-    public static function isSilent(channel:AudioChannel):Bool
+    @:generic
+    public static function isSilent<T:Float>(input:AudioChannel<T>):Bool
     {
-        return sumOfSquares(channel) < sumOfSquaresThreshold;
+        return sumOfSquares(input) < sumOfSquaresThreshold;
     }
 
-    public static function copyFrom(self:AudioChannel, other:AudioChannel, length:Int, otherStart:Int = 0, start:Int = 0):Void
+    @:generic
+    public static function copyFrom<T:Float>(self:AudioChannel<T>, other:AudioChannel<T>, length:Int,
+                                             otherStart:Int = 0, start:Int = 0):Void
     {
         #if cpp
-        if (Std.isOfType(self, ChannelsAudioChannel) && Std.isOfType(other, ChannelsAudioChannel)) {
-            cpp.NativeArray.blit(cast cast(self, ChannelsAudioChannel).channel, start,
-                                 cast cast(other, ChannelsAudioChannel).channel, otherStart, length);
-            return;
-        }
+        cpp.NativeArray.blit(cast self, start,
+                             cast other, otherStart, length);
         #end
         for (i in 0...length) {
             self[start + i] = other[otherStart + i];
         }
+    }
+
+    @:generic
+    public static function addFrom<T:Float>(self:AudioChannel<T>, other:AudioChannel<T>, length:Int,
+                                             otherStart:Int = 0, start:Int = 0):Void
+    {
+        // Definitely gotta optimize this in C++
+        for (i in 0...length) {
+            self[start + i] += other[otherStart + i];
+        }
+    }
+
+    /** Returns a resampled version of the channel **/
+    @:generic
+    public function resample<T:Float>(input:AudioChannel<T>, ratio:Float):AudioChannel<T> {
+        var newNumSamples = Math.ceil(input.length * ratio);
+        var newAudioChannel = new AudioChannel<T>(newNumSamples);
+        var interpolator = new LinearInterpolator<T>();
+        interpolator.resampleIntoChannel(input, newAudioChannel, ratio);
+        return newAudioChannel;
     }
 
     // /**
