@@ -1,40 +1,19 @@
 package grig.audio;
 
 @:forward
-abstract AudioBuffer(AudioBufferImpl) from AudioBufferImpl to AudioBufferImpl
+@:generic
+abstract AudioBuffer<T:Float>(AudioBufferData<T>) from AudioBufferData<T> to AudioBufferData<T>
 {
-    public var sampleRate(get, never):Float;
-    public var numChannels(get, never):Int;
-    public var numSamples(get, never):Int;
-
-    private inline function get_sampleRate():Float
-    {
-        return this.getSampleRate();
-    }
-
-    private inline function get_numChannels():Int
-    {
-        return this.getNumChannels();
-    }
-
-    private inline function get_numSamples():Int
-    {
-        return this.getNumSamples();
-    }
-
-    public inline function new(buffer:AudioBufferImpl)
-    {
-        this = buffer;
+    public inline function new(numChannels:Int, numSamples:Int, sampleRate:Float) {
+        this = new AudioBufferData(numChannels, numSamples, sampleRate);
     }
 
     @:arrayAccess
-    public inline function get(i:Int):AudioChannel
-    {
-        return new AudioChannel(this.getChannel(i));
+    public inline function get(i:Int):AudioChannel<T> {
+        return this.get(i);
     }
 
-    public inline function copyFrom(other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void
-    {
-        AudioBufferTools.copyFrom(this, other, length, otherStart, start);
-    }
+    // public inline function copyFrom(other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void {
+    //     AudioBufferTools.copyFrom(this, other, length, otherStart, start);
+    // }
 }

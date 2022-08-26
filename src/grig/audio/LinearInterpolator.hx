@@ -31,7 +31,7 @@ class LinearInterpolator
     //     return newBuffer;
     // }
 
-    public static function resampleIntoChannel(input:AudioChannel, output:AudioChannel, ratio:Float):Void
+    public static function resampleIntoChannel(input:AudioChannel<Float>, output:AudioChannel<Float>, ratio:Float):Void
     {
         if (ratio == 0.0) return;
         var newNumSamples = Math.ceil(input.length * ratio);

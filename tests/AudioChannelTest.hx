@@ -3,6 +3,7 @@ package;
 import grig.audio.AudioBuffer;
 import grig.audio.AudioChannel;
 import grig.audio.LinearInterpolator;
+import grig.audio.NumericTypes;
 import tink.unit.Assert.*;
 
 @:asserts
@@ -14,7 +15,7 @@ class AudioChannelTest {
 
     public function testAdd()
     {
-        // var length = 100;
+        var length = 100;
         // var channel1Data = new AudioChannelData(length);
         // var channel1 = new AudioChannel(channel1Data);
         // var channel2Data = new AudioChannelData(length);
@@ -31,11 +32,11 @@ class AudioChannelTest {
 
     public function testResample()
     {
-        // var length = 10;
-        // var buffer = AudioBuffer.create(1, length, 44100.0);
-        // for (i in 0...buffer.length) {
-        //     buffer.channels[0][i] = i;
-        // }
+        var length = 10;
+        var buffer = new AudioBuffer<Float32>(1, length, 44100.0);
+        for (i in 0...buffer.numSamples) {
+            buffer[0][i] = i;
+        }
         // var resampledBuffer1 = buffer.resample(2.0);
         // var resampledBuffer2 = buffer.resample(0.5);
 
