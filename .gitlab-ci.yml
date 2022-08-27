@@ -14,8 +14,6 @@ test:
    - haxe tests.hxml -cs bin                        && mono bin/bin/RunTests.exe
    - haxe tests.hxml -php bin/php                   && php bin/php/index.php
    - haxe tests.hxml -lua bin/tests.lua             && lua bin/tests.lua
-   - ./scripts/verify_retval.sh "haxe tests/macro/fail.hxml" 1
-   - ./scripts/verify_retval.sh "haxe tests/macro/succeed.hxml" 0
 
 release:
   stage: deploy
