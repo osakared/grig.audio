@@ -25,6 +25,12 @@ class AudioBufferData
         this.sampleRate = sampleRate;
     }
 
+    public static function ofNativeArray(channels:Ndarray, sampleRate:Float):AudioBufferData {
+        var newBuffer = new AudioBufferData(0, 0, sampleRate);
+        newBuffer.channels = channels;
+        return newBuffer;
+    }
+
     public inline function get(key:Int):AudioChannel {
         return channels.__getitem__(key);
     }

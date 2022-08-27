@@ -1,6 +1,7 @@
 package grig.audio.js.webaudio; #if (js && !nodejs)
 
 import grig.audio.AudioCallback;
+import grig.audio.NumericTypes;
 import js.html.audio.AudioContext;
 import js.html.audio.AudioNode;
 import js.html.audio.AudioProcessingEvent;
@@ -47,8 +48,8 @@ class AudioInterface
         streamInfo.inputTime = new AudioTime(currentTime);
         streamInfo.outputTime = new AudioTime(event.playbackTime);
         streamInfo.callbackTime = new AudioTime(currentTime);
-        var inputBuffer:grig.audio.AudioBuffer = new AudioBuffer(event.inputBuffer);
-        audioCallback(inputBuffer, new AudioBuffer(event.outputBuffer), event.outputBuffer.sampleRate, streamInfo);
+        var inputBuffer:AudioBuffer = event.inputBuffer;
+        audioCallback(inputBuffer, event.outputBuffer, event.outputBuffer.sampleRate, streamInfo);
     }
 
     private function instantiateContext():Void

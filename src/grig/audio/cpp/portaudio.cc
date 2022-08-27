@@ -1,7 +1,7 @@
 #include "portaudio/portaudio/include/portaudio.h"
 
-#include <grig/audio/ChannelsAudioChannel.h>
-#include <grig/audio/InterleavedAudioChannel.h>
+#include <grig/audio/AudioBufferData.h>
+#include <grig/audio/InterleavedAudioBufferData.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -131,16 +131,16 @@ int grig_callback(const void *input, void *output, unsigned long frameCount, con
     auto inputChannels = (float**)input;
     auto outputChannels = (float**)output;
 
-    auto inputBuffer = (::grig::audio::ChannelsAudioBuffer)audioInterface->inputBuffer;
-    auto outputBuffer = (::grig::audio::ChannelsAudioBuffer)audioInterface->outputBuffer;
+    auto inputBuffer = (::grig::audio::AudioBufferData)audioInterface->inputBuffer;
+    auto outputBuffer = (::grig::audio::AudioBufferData)audioInterface->outputBuffer;
 
     for (size_t c = 0; c < inputBuffer->channels->size(); ++c) {
-        auto channel = inputBuffer->getChannel(c);
-        channel->channel->setUnmanagedData(inputChannels[c], frameCount);
+        auto channel = inputBuffer->get(c);
+        channel->setUnmanagedData(inputChannels[c], frameCount);
     }
     for (size_t c = 0; c < outputBuffer->channels->size(); ++c) {
-        auto channel = outputBuffer->getChannel(c);
-        channel->channel->setUnmanagedData(outputChannels[c], frameCount);
+        auto channel = outputBuffer->get(c);
+        channel->setUnmanagedData(outputChannels[c], frameCount);
     }
 
     fillStreamInfo(audioInterface->streamInfo, timeInfo, statusFlags);
@@ -151,30 +151,30 @@ int grig_callback(const void *input, void *output, unsigned long frameCount, con
     return 0;
 }
 
-int grig_callback_interleaved(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo,
-                  PaStreamCallbackFlags statusFlags, void *userData)
-{
-    int base = 0;
-    // Register thread to hxcpp's gc
-    hx::SetTopOfStack(&base, true);
+// int grig_callback_interleaved(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo,
+//                   PaStreamCallbackFlags statusFlags, void *userData)
+// {
+//     int base = 0;
+//     // Register thread to hxcpp's gc
+//     hx::SetTopOfStack(&base, true);
 
-    auto audioInterface = (grig::audio::cpp::AudioInterface_obj*)userData;
-    auto inputChannels = (float*)input;
-    auto outputChannels = (float*)output;
+//     auto audioInterface = (grig::audio::cpp::AudioInterface_obj*)userData;
+//     auto inputChannels = (float*)input;
+//     auto outputChannels = (float*)output;
 
-    auto inputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->inputBuffer;
-    auto outputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->outputBuffer;
+//     auto inputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->inputBuffer;
+//     auto outputBuffer = (::grig::audio::InterleavedAudioBuffer)audioInterface->outputBuffer;
 
-    inputBuffer->channels->setUnmanagedData(inputChannels, frameCount * inputBuffer->numChannels);
-    outputBuffer->channels->setUnmanagedData(outputChannels, frameCount * outputBuffer->numChannels);
+//     inputBuffer->channels->setUnmanagedData(inputChannels, frameCount * inputBuffer->numChannels);
+//     outputBuffer->channels->setUnmanagedData(outputChannels, frameCount * outputBuffer->numChannels);
 
-    fillStreamInfo(audioInterface->streamInfo, timeInfo, statusFlags);
+//     fillStreamInfo(audioInterface->streamInfo, timeInfo, statusFlags);
 
-    audioInterface->callAudioCallback();
+//     audioInterface->callAudioCallback();
 
-    hx::SetTopOfStack((int*)0, true);
-    return 0;
-}
+//     hx::SetTopOfStack((int*)0, true);
+//     return 0;
+// }
 
 void pa_check_errors(PaError err, ::Array<::String> errors)
 {
@@ -191,14 +191,14 @@ int open_port(hx::ObjectPtr<grig::audio::cpp::AudioInterface_obj> audioInterface
     int numOutputChannels = options->__Field(HX_CSTRING("outputNumChannels"), HX_PROP_DYNAMIC).asInt();
     unsigned long framesPerBuffer = options->__Field(HX_CSTRING("bufferSize"), HX_PROP_DYNAMIC).asInt();
     double sampleRate = options->__Field(HX_CSTRING("sampleRate"), HX_PROP_DYNAMIC).asDouble();
-    bool interleaved = options->__Field(HX_CSTRING("interleaved"), HX_PROP_DYNAMIC).asInt();
+    // bool interleaved = options->__Field(HX_CSTRING("interleaved"), HX_PROP_DYNAMIC).asInt();
 
     PaSampleFormat sampleFormat = SAMPLE_FORMAT;
-    PaStreamCallback *callback = grig_callback_interleaved;
-    if (!interleaved) {
+    // PaStreamCallback *callback = grig_callback_interleaved;
+    // if (!interleaved) {
         sampleFormat |= paNonInterleaved;
-        callback = grig_callback;
-    }
+        PaStreamCallback *callback = grig_callback;
+    // }
 
     if (inputPortVal.isNull() && outputPortVal.isNull()) {
         auto ret = Pa_OpenDefaultStream(stream, numInputChannels, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer,

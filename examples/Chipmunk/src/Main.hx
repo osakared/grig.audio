@@ -5,19 +5,24 @@ import grig.audio.LinearInterpolator;
 import haxe.Timer;
 import tink.core.Future;
 
+using grig.audio.NumericTypes;
+using grig.audio.AudioBufferTools;
+using grig.audio.AudioChannelTools;
+
 class Main
 {
-    private static function audioCallbackWithInput(input:grig.audio.AudioBuffer, output:grig.audio.AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
+    private static function audioCallbackWithInput(input:grig.audio.AudioBuffer<Float32>, output:grig.audio.AudioBuffer<Float32>, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
         var ratio = 0.25;
-        if (input.channels.length < 1) return;
-        LinearInterpolator.resampleIntoChannel(input.channels[0], output.channels[0], ratio);
-        var length = Math.floor(output.length * ratio);
-        for (i in 1...Std.int(output.length / length)) {
-            output.channels[0].copyInto(output.channels[0], 0, length, length * i);
+        if (input.numChannels < 1) return;
+        var interpolator = new LinearInterpolator<Float32>();
+        interpolator.resampleIntoChannel(input[0], output[0], ratio);
+        var length = Math.floor(output.numSamples * ratio);
+        for (i in 1...Std.int(output.numSamples / length)) {
+            output[0].copyFrom(output[0], length, 0, length * i);
         }
-        for (c in 1...output.channels.length) {
-            output.channels[0].copyInto(output.channels[c], 0, output.length);
+        for (c in 1...output.numChannels) {
+            output[c].copyFrom(output[0], output.numSamples);
         }
     }
 

@@ -37,7 +37,7 @@ class AudioInterface
     
     // Variables to be used only in audio thread
     private var inputBuffer:AudioBuffer<Float32>;
-    private var inputBufferInterleaved:InterleavedAudioBuffer<Float32>;
+    // private var inputBufferInterleaved:InterleavedAudioBuffer<Float32>;
     private var outputBuffer:AudioBuffer<Float32>;
     private var streamInfo = new grig.audio.AudioStreamInfo();
 
@@ -85,14 +85,14 @@ class AudioInterface
         if (options.outputLatency == null) options.outputLatency = 0.01;
         if (options.interleaved == null) options.interleaved = false;
 
-        if (options.interleaved) {
-            inputBuffer = new InterleavedAudioBuffer<Float32>(options.inputNumChannels, 0, options.sampleRate);
-            outputBuffer = new InterleavedAudioBuffer<Float32>(options.outputNumChannels, 0, options.sampleRate);
-        }
-        else {
+        // if (options.interleaved) {
+            // inputBuffer = new InterleavedAudioBuffer<Float32>(options.inputNumChannels, 0, options.sampleRate);
+            // outputBuffer = new InterleavedAudioBuffer<Float32>(options.outputNumChannels, 0, options.sampleRate);
+        // }
+        // else {
             inputBuffer = new AudioBuffer<Float32>(options.inputNumChannels, 0, options.sampleRate);
             outputBuffer = new AudioBuffer<Float32>(options.outputNumChannels, 0, options.sampleRate);
-        }
+        // }
     }
 
     public function openPort(options:AudioInterfaceOptions):Surprise<AudioInterface, tink.core.Error>

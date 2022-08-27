@@ -1,7 +1,7 @@
 package grig.audio.js.webaudio; #if (js && !nodejs)
 
 @:forward(sampleRate)
-abstract AudioBuffer(js.html.audio.AudioBuffer)
+abstract AudioBuffer(js.html.audio.AudioBuffer) from js.html.audio.AudioBuffer
 {
     public var numChannels(get, never):Int;
     public var numSamples(get, never):Int;

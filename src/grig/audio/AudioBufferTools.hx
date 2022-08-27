@@ -29,4 +29,9 @@ class AudioBufferTools
         }
         return output;
     }
+
+    @:generic
+    public static function clear<T:Float>(input:AudioBuffer<T>):Void {
+        for (i in 0...input.numChannels) AudioChannelTools.clear(input[i]);
+    }
 }
