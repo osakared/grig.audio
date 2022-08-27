@@ -7,7 +7,7 @@ import haxe.macro.Context;
 
 using haxe.macro.PositionTools;
 
-class PABuild
+class Build
 {
     private static function addCoreFlags(files:Xml, target:Xml)
     {

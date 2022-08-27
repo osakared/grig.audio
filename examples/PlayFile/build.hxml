@@ -6,14 +6,14 @@
 -resource DeepElmBlues.wav@DeepElmBlues.wav
 -main Main
 
---each
+# --each
 
--js bin/PlayFile.js
+# -js bin/PlayFile.js
 
---next
+# --next
 
--python bin/PlayFile.py
+# -python bin/PlayFile.py
 
---next
+# --next
 
 -cpp bin/PlayFile

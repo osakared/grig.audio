@@ -1,3 +1,5 @@
 package grig.audio;
 
-typedef AudioCallback = (input:AudioBuffer, output:AudioBuffer, sampleRate:Float, audioStreamInfo:AudioStreamInfo)->Void;
+import grig.audio.NumericTypes;
+
+typedef AudioCallback = (input:AudioBuffer<Float32>, output:AudioBuffer<Float32>, sampleRate:Float, audioStreamInfo:AudioStreamInfo)->Void;

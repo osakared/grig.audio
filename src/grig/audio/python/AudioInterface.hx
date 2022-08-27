@@ -3,6 +3,7 @@ package grig.audio.python; #if python
 import grig.audio.AudioBuffer;
 import grig.audio.AudioCallback;
 import grig.audio.AudioChannel;
+import grig.audio.NumericTypes;
 import grig.audio.python.numpy.Ndarray;
 import python.Dict;
 import python.Exceptions;
@@ -12,6 +13,8 @@ import python.VarArgs;
 import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
+
+using grig.audio.AudioBufferTools;
 
 typedef NInt = Null<Int>;
 
@@ -64,8 +67,8 @@ class AudioInterface
     private var inputLatency:Float;
     private var outputLatency:Float;
 
-    private var inputBuffer:AudioBuffer = null;
-    private var outputBuffer:AudioBuffer = null;
+    private var inputBuffer:AudioBuffer<Float32> = null;
+    private var outputBuffer:AudioBuffer<Float32> = null;
 
     private function callbackHandler(input:python.Bytes, frameCount:Int, timeInfo:Dict<String, Float>, statusFlags:Int):Tuple2<python.Bytearray, Int>
     {
@@ -76,11 +79,10 @@ class AudioInterface
             var inputDataInterleaved = grig.audio.python.numpy.Numpy.frombuffer(input, kwargs);
             var inputData:Ndarray = python.Syntax.code('[{0}[idx::{1}] for idx in range({1})]', inputDataInterleaved, outputNumChannels);
             // var inputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
-            inputBuffer = new AudioBuffer(new AudioBufferData(inputData), sampleRate);
+            inputBuffer = AudioBuffer.ofNativeArray(inputData, sampleRate);
         }
         else if (inputBuffer == null) {
-            var inputData:Ndarray = new Ndarray(python.Syntax.code('[]'));
-            inputBuffer = new AudioBuffer(new AudioBufferData(inputData), sampleRate);
+            inputBuffer = new AudioBuffer(0, 0, sampleRate);
         }
         else {
             inputBuffer.clear();
@@ -88,8 +90,7 @@ class AudioInterface
 
         if (outputBuffer == null) {
             // Don't forget to switch to looking at numInputChannels whenever the problem with pyAudio only supporting one number to rule them all is fixed
-            var outputData:Ndarray = grig.audio.python.numpy.Numpy.zeros(python.Tuple2.make(outputNumChannels, Std.int(frameCount)));
-            outputBuffer = new AudioBuffer(new AudioBufferData(outputData), sampleRate);
+            outputBuffer = new AudioBuffer(outputNumChannels, Std.int(frameCount), sampleRate);
         }
         else {
             outputBuffer.clear();
@@ -107,7 +108,7 @@ class AudioInterface
 
         audioCallback(inputBuffer, outputBuffer, sampleRate, streamInfo);
 
-        var outputArrayArgs = new Tuple<Ndarray>(cast [for (i in 0...outputBuffer.channels.length) outputBuffer.channels[i]]);
+        var outputArrayArgs = new Tuple<Ndarray>(cast [for (i in 0...outputBuffer.numChannels) outputBuffer[i]]);
         var output = grig.audio.python.numpy.Numpy.dstack(outputArrayArgs).flatten().astype('float32').tobytes();
         return new Tuple2([python.Syntax.code('bytes({0})', output), 0]);
     }

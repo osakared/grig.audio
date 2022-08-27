@@ -1,29 +1,43 @@
 package grig.audio;
 
-import grig.audio.AudioChannel.AudioChannelData;
-
-class LinearInterpolator
+@:generic
+class LinearInterpolator<T:Float>
 {
+    public function new() {}
+    
     /**
      * Returns a new input with ratio * input.length amount of samples
      * @param input input channel to be resampled
      * @param ratio ratio of output channel to input channel length
      * @return AudioChannel
      */
-    public static function resampleChannel(input:AudioChannel, ratio:Float):AudioChannel
+    public function resampleChannel(input:AudioChannel<T>, ratio:Float):AudioChannel<T>
     {
         var newNumSamples = Math.ceil(input.length * ratio);
-        var newAudioChannel = new AudioChannel(new AudioChannelData(newNumSamples));
+        var newAudioChannel = new AudioChannel<T>(newNumSamples);
         resampleIntoChannel(input, newAudioChannel, ratio);
         return newAudioChannel;
     }
 
-    public static function resampleIntoChannel(input:AudioChannel, output:AudioChannel, ratio:Float):Void
+    public function resampleBuffer(input:AudioBuffer<T>, ratio:Float, repitch:Bool = false):AudioBuffer<T>
     {
-        var newNumSamples = Math.ceil(input.length * ratio);
-        if (ratio == 0.0) return;
+        var newNumSamples = Math.ceil(input.numSamples * ratio);
+        var sampleRate = repitch ? input.sampleRate : input.sampleRate * ratio;
+        var newBuffer = new AudioBuffer<T>(input.numChannels, newNumSamples, sampleRate);
 
-        newNumSamples = newNumSamples < output.length ? newNumSamples : output.length;
+        for (c in 0...input.numChannels) {
+            resampleIntoChannel(input[c], newBuffer[c], ratio);
+        }
+
+        return newBuffer;
+    }
+
+    public function resampleIntoChannel(input:AudioChannel<T>, output:AudioChannel<T>, ratio:Float):Void
+    {
+        if (ratio == 0.0) return;
+        var newNumSamples = Math.ceil(input.length * ratio);
+
+        newNumSamples = Ints.min(newNumSamples, output.length);
         for (i in 0...newNumSamples) {
             var idx = i / ratio;
             var leftIdx = Math.floor(idx);
@@ -34,7 +48,7 @@ class LinearInterpolator
             }
             var leftVal = input[leftIdx];
             var rightVal = input[rightIdx];
-            output[i] = (leftVal + (rightVal - leftVal) * (idx - leftIdx) / (rightIdx - leftIdx));
+            output[i] = cast (leftVal + (rightVal - leftVal) * (idx - leftIdx) / (rightIdx - leftIdx));
         }
     }
 }

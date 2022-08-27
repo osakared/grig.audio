@@ -24,5 +24,3 @@ script:
   - haxelib run travix cs
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then haxelib run travix php    ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then haxelib run travix lua      ; fi
-  - ./scripts/verify_retval.sh "haxe tests/macro/fail.hxml" 1
-  - ./scripts/verify_retval.sh "haxe tests/macro/succeed.hxml" 0

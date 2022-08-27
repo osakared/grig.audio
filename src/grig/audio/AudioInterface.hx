@@ -7,7 +7,7 @@ typedef AudioInterface = NativeChannelAudioInterface;
 #elseif (js && !nodejs && !DISABLE_WEBAUDIO_AUDIO_INTERFACE)
 typedef AudioInterface = grig.audio.js.webaudio.AudioInterface;
 #elseif (cpp && !DISABLE_PA_AUDIO_INTERFACE)
-typedef AudioInterface = grig.audio.cpp.PAAudioInterface;
+typedef AudioInterface = grig.audio.cpp.AudioInterface;
 #elseif (python && !DISABLE_PYTHON_AUDIO_INTERFACE)
 typedef AudioInterface = grig.audio.python.AudioInterface;
 #else

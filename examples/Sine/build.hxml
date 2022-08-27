@@ -2,5 +2,6 @@
 -cp ../../src
 -dce no
 -lib tink_core
--main Main
-# -js bin/Sine.js
+-lib hscript-template
+--macro grig.audio.hxal.Macro.setEnvironment("cpp")
+--run SineProcessor

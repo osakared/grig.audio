@@ -1,0 +1,4 @@
+# @install: lix --silent download "haxelib:/hscript-template#2.0.0" into hscript-template/2.0.0/haxelib
+-lib hscript
+-cp ${HAXE_LIBCACHE}/hscript-template/2.0.0/haxelib/
+-D hscript-template=2.0.0
