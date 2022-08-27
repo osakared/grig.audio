@@ -61,6 +61,28 @@ class ClassDescriptor
         }
     }
 
+    public static function getHVar(field:{name:String, meta:Null<Metadata>},
+                                   complexType:ComplexType, expr:Expr, pos:Position):HVar {
+        if (complexType == null) {
+            Macro.error("Unspecified type in declaration not supported", pos);
+        }
+        var name = field.name;
+        var type = getType(complexType, pos);
+        // nodeVar.expr = expr;
+        // verifySupportedVarAccess(nodeVar, field.access);
+        for (meta in field.meta) {
+            if (!meta.name.startsWith(metaPrefix)) continue;
+            var hMeta = meta.name.substring(metaPrefix.length);
+            switch hMeta {
+                // We haven't implemented anything yet
+                default:
+                    Macro.warning('hxal macro "${hMeta}" not defined', pos);
+            }
+        }
+        // TODO we need to do something with expr, let people initialize?
+        return {name: name, type: type, definedLocation: Defined(pos)};
+    }
+
     public function new(classType:ClassType) {
         className = classType.name;
 
@@ -74,25 +96,9 @@ class ClassDescriptor
 
             switch (field.kind) {
                 case FVar(complexType, expr):
-                    if (complexType == null) {
-                        Macro.error("Unspecified type in declaration not supported", field.pos);
-                    }
-                    var name = field.name;
-                    var type = getType(complexType, field.pos);
-                    // nodeVar.expr = expr;
-                    // verifySupportedVarAccess(nodeVar, field.access);
-                    for (meta in field.meta) {
-                        if (!meta.name.startsWith(metaPrefix)) continue;
-                        var hMeta = meta.name.substring(metaPrefix.length);
-                        switch hMeta {
-                            // We haven't implemented anything yet
-                            default:
-                                Macro.warning('hxal macro "${hMeta}" not defined', field.pos);
-                        }
-                    }
-                    vars.push({name: name, type: type, definedLocation: Defined(field.pos)});
+                    vars.push(getHVar(field, complexType, expr, field.pos));
                 case FFun(fun):
-                    trace('fun');
+                    var fn = new FunctionDescriptor(field.name, fun, field.pos);
                 case FProp(_, _):
                     Macro.error("Properties not supported", field.pos);
             }

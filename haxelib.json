@@ -12,9 +12,9 @@
   "contributors": [
     "thomasjwebb"
   ],
-  "releasenote": "Added realtime audio checker",
-  "version": "0.0.5",
+  "releasenote": "Added first version of hxal audio dsl",
+  "version": "0.0.6",
   "dependencies": {
-    "tink_core": "1.26.0"
+    "tink_core": "2.0.2"
   }
 }
