@@ -1,7 +1,5 @@
 package grig.audio.js.webaudio; #if (js && !nodejs)
 
-import grig.audio.AudioChannel;
-
 @:forward(sampleRate)
 abstract AudioBuffer(js.html.audio.AudioBuffer)
 {
@@ -16,7 +14,7 @@ abstract AudioBuffer(js.html.audio.AudioBuffer)
         return this.length;
     }
 
-    inline public function new(numChannels:Int, numSamples:Int, sampleRate:Float)
+    public inline function new(numChannels:Int, numSamples:Int, sampleRate:Float)
     {
         this = new js.html.audio.AudioBuffer({
             sampleRate: sampleRate,
@@ -26,7 +24,7 @@ abstract AudioBuffer(js.html.audio.AudioBuffer)
     }
 
     @:arrayAccess
-    public inline function get(i:Int):js.lib.Float32Array {
+    public inline function get(i:Int):AudioChannel {
         return return this.getChannelData(i);
     }
 
@@ -36,16 +34,6 @@ abstract AudioBuffer(js.html.audio.AudioBuffer)
             this.getChannelData(i).fill(0.0);
         }
     }
-
-    // public function resample(ratio:Float, repitch:Bool = false)
-    // {
-    //     if (ratio == 0) return create(0, 0, 44100.0);
-    //     var newBuffer = create(channels.length, Math.ceil(this.length * ratio), repitch ? this.sampleRate : this.sampleRate * ratio);
-    //     for (c in 0...newBuffer.channels.length) {
-    //         LinearInterpolator.resampleIntoChannel(channels[c], newBuffer.channels[c], ratio);
-    //     }
-    //     return newBuffer;
-    // }
 }
 
 #end

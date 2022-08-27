@@ -1,4 +1,4 @@
-package grig.audio;
+package grig.audio; #if (!js && !python)
 
 @:generic
 class InterleavedAudioBufferData<T:Float>
@@ -22,3 +22,5 @@ class InterleavedAudioBufferData<T:Float>
         return new InterleavedAudioChannelView<T>(channels, numChannels, channel);
     }
 }
+
+#end

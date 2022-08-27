@@ -2,9 +2,9 @@ package;
 
 import grig.audio.AudioBuffer;
 import grig.audio.AudioInterface;
+import grig.audio.Ints;
 import grig.audio.LinearInterpolator;
 import haxe.Timer;
-import thx.Ints;
 import tink.core.Future;
 
 class Main

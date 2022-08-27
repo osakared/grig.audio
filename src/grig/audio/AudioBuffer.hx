@@ -1,11 +1,17 @@
 package grig.audio;
 
+#if (js && !nodejs && !heaps)
+typedef AudioBuffer<T> = grig.audio.js.webaudio.AudioBuffer;
+#elseif python
+typedef AudioBuffer<T> = grig.audio.python.AudioBuffer;
+#else
+
 @:forward
 @:generic
 abstract AudioBuffer<T:Float>(AudioBufferData<T>) from AudioBufferData<T> to AudioBufferData<T>
 {
     public inline function new(numChannels:Int, numSamples:Int, sampleRate:Float) {
-        this = new AudioBufferData(numChannels, numSamples, sampleRate);
+        this = new AudioBufferData<T>(numChannels, numSamples, sampleRate);
     }
 
     @:arrayAccess
@@ -13,3 +19,5 @@ abstract AudioBuffer<T:Float>(AudioBufferData<T>) from AudioBufferData<T> to Aud
         return this.get(i);
     }
 }
+
+#end

@@ -1,7 +1,6 @@
 -cp src
 -cp ../../src
 -dce no
--lib thx.core
 -lib tink_core
 -lib format
 -resource DeepElmBlues.wav@DeepElmBlues.wav

@@ -1,8 +1,12 @@
 package grig.audio;
 
-import haxe.ds.Vector;
+#if (js && !nodejs && !heaps)
+typedef AudioChannel<T> = grig.audio.js.webaudio.AudioChannel;
+#elseif python
+typedef AudioChannel<T> = grig.audio.python.AudioChannel;
+#else
 
-// typedef AudioChannel<T:Float> = Vector<T>;
+import haxe.ds.Vector;
 
 @:forward
 abstract AudioChannel<T:Float>(Vector<T>) from Vector<T> to Vector<T>
@@ -29,3 +33,5 @@ abstract AudioChannel<T:Float>(Vector<T>) from Vector<T> to Vector<T>
         #end
     }
 }
+
+#end

@@ -1,10 +1,4 @@
-package grig.audio;
-
-// #if (js && !nodejs && !heaps)
-// typedef AudioBuffer = grig.audio.js.webaudio.AudioBuffer;
-// #elseif python
-// typedef AudioBuffer = grig.audio.python.AudioBuffer;
-// #else
+package grig.audio; #if (!js && !python)
 
 @:forward
 @:generic
@@ -19,3 +13,5 @@ abstract InterleavedAudioBuffer<T:Float>(InterleavedAudioBufferData<T>)
         return this.get(i);
     }
 }
+
+#end

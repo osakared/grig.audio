@@ -1,4 +1,4 @@
-package grig.audio;
+package grig.audio; #if (!js && !python)
 
 /**
     Represents a floating-point based signal
@@ -21,3 +21,5 @@ from InterleavedAudioChannelViewImpl<T> to InterleavedAudioChannelViewImpl<T>
         return this.set(i, sample);
     }
 }
+
+#end

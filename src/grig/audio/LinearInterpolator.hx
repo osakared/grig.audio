@@ -1,7 +1,5 @@
 package grig.audio;
 
-import thx.Ints;
-
 @:generic
 class LinearInterpolator<T:Float>
 {

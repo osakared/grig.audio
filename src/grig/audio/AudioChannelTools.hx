@@ -81,8 +81,10 @@ class AudioChannelTools
     public static function clear<T:Float>(input:AudioChannel<T>) {
         #if cpp
         cpp.NativeArray.zero(cast input, 0, input.length);
+        #elseif (js && !nodejs)
+        input.clear();
         #else
-        setAll(input, 0);
+        setAll(input, cast 0);
         #end
     }
 

@@ -44,6 +44,7 @@ class AudioChannelTest {
         return assert(resampledBuffer1[0][1] == 0.5 && resampledBuffer2[0][1] == 2);
     }
 
+    #if (!js && !python)
     public function testInterleaved()
     {
         var buffer = new InterleavedAudioBuffer<Float64>(2, 10, 48000.0);
@@ -54,5 +55,6 @@ class AudioChannelTest {
 
         return assert(buffer[0][5] == 0.0);
     }
+    #end
 
 }

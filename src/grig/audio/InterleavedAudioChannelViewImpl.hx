@@ -1,4 +1,4 @@
-package grig.audio;
+package grig.audio; #if (!js && !python)
 
 class InterleavedAudioChannelViewImpl<T:Float>
 {
@@ -26,3 +26,5 @@ class InterleavedAudioChannelViewImpl<T:Float>
         return channels[getInterleavedIndex(i)] = val;
     }
 }
+
+#end

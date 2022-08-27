@@ -1,7 +1,5 @@
 package grig.audio;
 
-import thx.Ints;
-
 class AudioBufferTools
 {
     // public static function copyFrom(self:AudioBuffer, other:AudioBuffer, length:Int, otherStart:Int = 0, start:Int = 0):Void {

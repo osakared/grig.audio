@@ -3,4 +3,3 @@
 -main RunTests
 -dce full
 -lib tink_unittest
--lib thx.core
