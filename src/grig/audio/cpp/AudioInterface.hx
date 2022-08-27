@@ -2,8 +2,8 @@ package grig.audio.cpp; #if cpp
 
 import cpp.vm.Gc;
 import grig.audio.AudioBuffer;
-import grig.audio.ChannelsAudioBuffer;
 import grig.audio.InterleavedAudioBuffer;
+import grig.audio.NumericTypes;
 import tink.core.Error;
 import tink.core.Future;
 import tink.core.Outcome;
@@ -36,8 +36,9 @@ class AudioInterface
     private var stream:PAStream;
     
     // Variables to be used only in audio thread
-    private var inputBuffer:AudioBuffer;
-    private var outputBuffer:AudioBuffer;
+    private var inputBuffer:AudioBuffer<Float32>;
+    private var inputBufferInterleaved:InterleavedAudioBuffer<Float32>;
+    private var outputBuffer:AudioBuffer<Float32>;
     private var streamInfo = new grig.audio.AudioStreamInfo();
 
     private static function onDestruct(audioInterface:AudioInterface)
@@ -85,12 +86,12 @@ class AudioInterface
         if (options.interleaved == null) options.interleaved = false;
 
         if (options.interleaved) {
-            inputBuffer = InterleavedAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
-            outputBuffer = InterleavedAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+            inputBuffer = new InterleavedAudioBuffer<Float32>(options.inputNumChannels, 0, options.sampleRate);
+            outputBuffer = new InterleavedAudioBuffer<Float32>(options.outputNumChannels, 0, options.sampleRate);
         }
         else {
-            inputBuffer = ChannelsAudioBuffer.create(options.inputNumChannels, 0, options.sampleRate);
-            outputBuffer = ChannelsAudioBuffer.create(options.outputNumChannels, 0, options.sampleRate);
+            inputBuffer = new AudioBuffer<Float32>(options.inputNumChannels, 0, options.sampleRate);
+            outputBuffer = new AudioBuffer<Float32>(options.outputNumChannels, 0, options.sampleRate);
         }
     }
 

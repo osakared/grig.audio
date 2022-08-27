@@ -3,16 +3,19 @@ package;
 import grig.audio.AudioBuffer;
 import grig.audio.AudioInterface;
 import grig.audio.Ints;
+import grig.audio.NumericTypes;
 import grig.audio.LinearInterpolator;
 import haxe.Timer;
 import tink.core.Future;
 
+using grig.audio.AudioBufferTools;
+
 class Main
 {
     private static var location:Int = 0;
-    private static var buffer:AudioBuffer;
+    private static var buffer:AudioBuffer<Float32>;
 
-    private static function audioCallback(input:AudioBuffer, output:AudioBuffer, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
+    private static function audioCallback(input:AudioBuffer<Float32>, output:AudioBuffer<Float32>, sampleRate:Float, audioStreamInfo:grig.audio.AudioStreamInfo)
     {
         output.clear();
         if (buffer == null) return;
