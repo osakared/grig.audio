@@ -3,6 +3,8 @@
 [![pipeline status](https://gitlab.com/haxe-grig/grig.audio/badges/main/pipeline.svg)](https://gitlab.com/haxe-grig/grig.audio/commits/main)
 [![Build Status](https://travis-ci.org/osakared/grig.audio.svg?branch=main)](https://travis-ci.org/osakared/grig.audio)
 [![Gitter](https://badges.gitter.im/haxe-grig/Lobby.svg)](https://gitter.im/haxe-grig/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Managed with Taiga.io](https://img.shields.io/badge/managed%20with-TAIGA.io-709f14.svg)](https://tree.taiga.io/project/osakared-grig/ "Managed with Taiga.io")
+[![Read the Documentation](https://img.shields.io/badge/docs-read-blueviolet)](https://grig.tech/)
 
 See the [haxe grig documentation](https://grig.tech/)
 
@@ -15,3 +17,5 @@ haxe build.hxml -D enable_asio -D asio_path=C:/Users/username/Downloads/asio -cp
 ```
 
 For python target, pip packages `numpy`, `scipy` and `pyaudio` are needed.
+
+Read about the hxal (haxe audio language) DSL [here](HXAL.md).
