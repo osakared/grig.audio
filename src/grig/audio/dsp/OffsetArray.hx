@@ -1,4 +1,4 @@
-package dsp;
+package grig.audio.dsp;
 
 /**
 	A view into an Array with an indexing offset.

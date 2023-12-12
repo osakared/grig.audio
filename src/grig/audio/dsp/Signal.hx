@@ -1,4 +1,4 @@
-package dsp;
+package grig.audio.dsp;
 
 using Lambda;
 

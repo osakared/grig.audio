@@ -1,7 +1,0 @@
---class-path src
-
--main dsp.FFT
-
--D analyzer-optimize
-
---interp
